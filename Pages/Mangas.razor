@@ -1,0 +1,34 @@
+﻿@page "/mangas"
+@using OpenManga.Pages.Components
+@inject IDialogService DialogService
+
+<MudGrid>
+    <MudItem xs="3">
+        <MudCard Style="margin-top: 10px; width: 250px;" Elevation="3">
+            <MudCardMedia Image="https://images-na.ssl-images-amazon.com/images/I/81OGoMjeQ2L.jpg" Height="200"/>
+            <MudCardContent Style="padding-right: 60px">
+                <MudText Typo="Typo.h5"><b>Magi</b></MudText>
+                @* <MudText Typo="Typo.body2">There isn't a description yet.</MudText> *@
+                <MudText Typo="Typo.body2">Last downloaded: V10</MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/mangas/magi">Download</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary">Edit</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+    
+    <MudItem xs="3" Style="display: flex;">
+        <MudFab OnClick="@((e) => CreateNewManga())" Style="align-self: center;" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" aria-label="add" />
+    </MudItem>
+
+</MudGrid>
+
+@code{
+
+    void CreateNewManga()
+    {
+        var dialog = DialogService.Show<NewMangaDialog>("Add new manga");
+    }
+
+}

@@ -1,0 +1,32 @@
+﻿<MudGrid Style="padding: 15px">
+    <MudItem xs="12">
+        <MudTextField @bind-Value="name" Label="Name" Variant="Variant.Outlined"></MudTextField>
+    </MudItem>
+    
+    <MudItem xs="12">
+        <MudTextField @bind-Value="baseurl" Label="Baseurl" Variant="Variant.Outlined"></MudTextField>
+    </MudItem>
+    
+    <MudItem xs="12">
+        <MudTextField @bind-Value="cover" Label="Cover url" Variant="Variant.Outlined"></MudTextField>
+    </MudItem>
+    
+    <MudItem xs="12">
+        <div style="display: flex">
+            <MudButton OnClick="Cancel" Color="Color.Error" Style="margin-right: 15px">Cancel</MudButton>
+            <MudButton OnClick="Okay" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary"  Size="Size.Large">Add</MudButton>
+        </div>
+    </MudItem>
+</MudGrid>
+
+@code{
+
+    [CascadingParameter] MudDialogInstance dialog { get; set; }
+    public String name;
+    public String baseurl;
+    public String cover;
+    
+    void Okay() => dialog.Close(DialogResult.Ok(true));
+    void Cancel() => dialog.Close(DialogResult.Cancel());
+
+}
