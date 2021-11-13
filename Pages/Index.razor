@@ -1,3 +1,16 @@
 @page "/home"
+@using Database
+@inject ILocalStorageService _storage
+@inject IDatabase db
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary">Primary</MudButton>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(()=> db.DELETEWHOLEDB())">Primary</MudButton>
+
+@code{
+
+    protected override void OnInitialized()
+    {
+        db.SetLocalStorage(_storage);
+        base.OnInitialized();
+    }
+
+}

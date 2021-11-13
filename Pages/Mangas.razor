@@ -21,7 +21,7 @@
             <div class="manga" Style="max-height: 600px; margin-right: 12px; margin-left: 12px; max-width: 250px; margin-top: 50px">
                 <MudItem Class="d-flex align-center justify-center" Style="margin-top: 10px; max-width: 300px;" xs="3">
                     <MudCard Elevation="3">
-                        <a href="@($"mangas/{item.name.Replace(" ","-")}")">
+                        <a href="@($"mangas/{item.id}")">
                             <MudCardMedia Image="@(item.cover)" Height="200"/>
                             <MudCardContent Style="padding-right: 60px">
                                 <MudText Style="font-size: 110%" Typo="Typo.h5"><b>@(item.name.Length <= 17 ? item.name : item.name.Substring(0,17)+"...")</b></MudText>
@@ -53,6 +53,7 @@
         public string baseurl { get; set; }
         public string cover { get; set; }
         public string lastread { get; set; } = "None";
+        public string id { get; set; }
         
         public DataManga(){}
 

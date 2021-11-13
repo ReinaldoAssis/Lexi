@@ -1,15 +1,17 @@
 ﻿@page "/mangas/{id}/"
 @using static Mangas
 @using InputType = MudBlazor.InputType
+@using Database
 @inject ILocalStorageService localStorage
+@inject IDatabase db
 
-<MudText Typo="Typo.h3">@id.Replace("-"," ")</MudText>
+<MudText Typo="Typo.h3">@(manga.name ?? "Loading...")</MudText>
 
 <div style="width: 100%; margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; margin-bottom: 10px">
     <img src="@manga.cover" style="width: 90%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4)"/>
     <div>
         <MudText Typo="Typo.h5">Last read: @manga.lastread</MudText>
-        <MudTextField Label="Base Url" Style="width: 70%" @bind-Value="@manga.baseurl" InputType="InputType.Text" T="string"></MudTextField>
+        <MudTextField Label="Base Url" Style="width: 70%" TextChanged="@BaseUrlChanged" @bind-Value="@manga.baseurl" InputType="InputType.Text" T="string"></MudTextField>
         @if (!volumeOK)
         {
             <MudAlert Style="margin-top:10px; width: 70%" Severity="Severity.Error">Volume parameter must be set!</MudAlert>
@@ -20,7 +22,7 @@
             <MudAlert Style="margin-top:10px;width: 70%" Severity="Severity.Error">Page parameter must be set!</MudAlert>
         }
         <br/>
-        <MudTextField Style="width: 70%" Label="Cover Url" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
+        <MudTextField Style="width: 70%" Label="Cover Url" TextChanged="@(()=>db.SaveManga(manga))" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
         
     </div>
 </div>
@@ -31,7 +33,7 @@
 @code{
 
     [Parameter]
-    public String id { get; set; }
+    public string id { get; set; }
 
     bool fastdownload = true;
     bool volumeOK = false;
@@ -39,11 +41,33 @@
 
     public DataManga manga = new DataManga();
 
+    async void BaseUrlChanged()
+    {
+        if (manga.baseurl.ToLower().Contains("[volume]"))
+        {
+            volumeOK = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        else volumeOK = false;
+        if (manga.baseurl.ToLower().Contains("[page]"))
+        {
+            pageOK = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        else pageOK = false;
+
+        db.SaveManga(manga);
+
+    }
+
+    //void CoverUrlChanged() => Save();
+    
+
     protected override async void OnInitialized()
     {
-        List<DataManga> mangas = await localStorage.GetItemAsync<List<DataManga>>("mangas");
-        manga = mangas.Where(x => x.name == id.Replace("-", " ")).First();
+        manga = await db.GetManga(id);
         await InvokeAsync(() => StateHasChanged());
+        db.SetLocalStorage(localStorage);
         base.OnInitialized();
     }
 

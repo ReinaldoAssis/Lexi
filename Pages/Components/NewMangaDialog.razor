@@ -1,6 +1,8 @@
 ﻿@using Newtonsoft.Json.Linq
 @using Newtonsoft.Json
+@using Database
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IDatabase database
 
 <MudGrid Style="padding: 15px">
     <MudItem xs="12">
@@ -29,24 +31,25 @@
     public String name;
     public String baseurl;
     public String cover;
-
-    DataBase database;
-
-    protected override async void OnInitialized()
+    
+    
+    protected override void OnInitialized()
     {
-        database = new DataBase(localStorage);
+        database.SetLocalStorage(localStorage);
         base.OnInitialized();
     }
 
     async void Okay()
     {
-
-        //reads from DB and checks if list of mangas exists, if it does not, creates a new list
-        List<Mangas.DataManga> listMangas = await database.Read<List<Mangas.DataManga>>("mangas") ?? new List<Mangas.DataManga>();
-
-        //appends the new manga to the database variable and serializes it
-        //await database.Write(name, listMangas.Append(new Mangas.DataManga(name,baseurl,cover)));
-        await localStorage.SetItemAsync("mangas", listMangas.Append(new Mangas.DataManga(name, baseurl, cover)));
+        //
+        // //reads from DB and checks if list of mangas exists, if it does not, creates a new list
+        // List<Mangas.DataManga> listMangas = await localStorage.GetItemAsync<List<Mangas.DataManga>>("mangas") ?? new List<Mangas.DataManga>();
+        //
+        // //appends the new manga to the database variable and serializes it
+        // //await database.Write(name, listMangas.Append(new Mangas.DataManga(name,baseurl,cover)));
+        // await localStorage.SetItemAsync("mangas", listMangas.Append());
+        
+        database.SaveManga(new Mangas.DataManga(name, baseurl, cover));
 
         dialog.Close(DialogResult.Ok(true)); //closes the dialog with result OK
     }
