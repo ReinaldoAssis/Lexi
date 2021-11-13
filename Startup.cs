@@ -11,7 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenManga.Data;
 using MudBlazor.Services;
-using ElectronNET.API;  
+using ElectronNET.API;
+using Blazored.LocalStorage;
+
 
 namespace OpenManga
 {
@@ -41,6 +43,7 @@ namespace OpenManga
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
             services.AddMudServices();
+            services.AddBlazoredLocalStorage();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

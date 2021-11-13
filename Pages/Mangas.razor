@@ -1,10 +1,11 @@
 ﻿@page "/mangas"
 @using OpenManga.Pages.Components
 @inject IDialogService DialogService
+@inject ILocalStorageService localStorage
 
 <MudGrid>
-    <MudItem xs="3">
-        <MudCard Style="margin-top: 10px; width: 250px;" Elevation="3">
+    <MudItem Style="margin-top: 10px;  max-width: 300px" xs="3">
+        <MudCard Elevation="3">
             <MudCardMedia Image="https://images-na.ssl-images-amazon.com/images/I/81OGoMjeQ2L.jpg" Height="200"/>
             <MudCardContent Style="padding-right: 60px">
                 <MudText Typo="Typo.h5"><b>Magi</b></MudText>
@@ -18,17 +19,72 @@
         </MudCard>
     </MudItem>
     
+    @foreach (DataManga item in mangas)
+    {
+        <MudItem Style="margin-top: 10px; max-width: 300px" xs="3">
+            <MudCard Elevation="3">
+                <MudCardMedia Image="@(item.cover)" Height="200"/>
+                <MudCardContent Style="padding-right: 60px">
+                    <MudText Typo="Typo.h5"><b>@(item.name)</b></MudText>
+                    @* <MudText Typo="Typo.body2">There isn't a description yet.</MudText> *@
+                    <MudText Typo="Typo.body2">Last downloaded: V10</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/mangas/magi">Download</MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary">Edit</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
     <MudItem xs="3" Style="display: flex;">
-        <MudFab OnClick="@((e) => CreateNewManga())" Style="align-self: center;" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" aria-label="add" />
+        <MudFab OnClick="@((e) => CreateNewManga())" Style="align-self: center; position: relative" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" aria-label="add" />
     </MudItem>
 
+    
 </MudGrid>
 
 @code{
 
-    void CreateNewManga()
+    public partial class DataManga
     {
-        var dialog = DialogService.Show<NewMangaDialog>("Add new manga");
+        public string name { get; set; }
+        public string baseurl { get; set; }
+        public string cover { get; set; }
+        
+        public DataManga(){}
+
+        public DataManga(string _name, string _baseurl, string _cover)
+        {
+            name = _name;
+            baseurl = _baseurl;
+            cover = _cover;
+        }
+
+        public override string ToString()
+        {
+            return name + " " + baseurl + " " + cover;
+        }
+    }
+
+    List<DataManga> mangas = new List<DataManga>();
+
+    protected override async void OnInitialized()
+    {
+        //reads mangas list from DB, if it does not exists, creates a new empty one
+        mangas = await localStorage.GetItemAsync<List<DataManga>>("mangas") ?? new List<DataManga>();
+        await InvokeAsync(() => StateHasChanged());
+
+        foreach (DataManga dataManga in mangas)
+        {
+            Console.WriteLine(dataManga.ToString());
+        }
+        
+        base.OnInitialized();
+    }
+
+    async void CreateNewManga()
+    {
+        var dialog =  await DialogService.Show<NewMangaDialog>("Add new manga").Result;
     }
 
 }

@@ -1,4 +1,8 @@
-﻿<MudGrid Style="padding: 15px">
+﻿@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<MudGrid Style="padding: 15px">
     <MudItem xs="12">
         <MudTextField @bind-Value="name" Label="Name" Variant="Variant.Outlined"></MudTextField>
     </MudItem>
@@ -25,8 +29,28 @@
     public String name;
     public String baseurl;
     public String cover;
-    
-    void Okay() => dialog.Close(DialogResult.Ok(true));
+
+    DataBase database;
+
+    protected override async void OnInitialized()
+    {
+        database = new DataBase(localStorage);
+        base.OnInitialized();
+    }
+
+    async void Okay()
+    {
+
+        //reads from DB and checks if list of mangas exists, if it does not, creates a new list
+        List<Mangas.DataManga> listMangas = await database.Read<List<Mangas.DataManga>>("mangas") ?? new List<Mangas.DataManga>();
+
+        //appends the new manga to the database variable and serializes it
+        //await database.Write(name, listMangas.Append(new Mangas.DataManga(name,baseurl,cover)));
+        await localStorage.SetItemAsync("mangas", listMangas.Append(new Mangas.DataManga(name, baseurl, cover)));
+
+        dialog.Close(DialogResult.Ok(true)); //closes the dialog with result OK
+    }
     void Cancel() => dialog.Close(DialogResult.Cancel());
+
 
 }

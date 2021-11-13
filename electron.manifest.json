@@ -1,15 +1,15 @@
 {
-  "executable": "OpenLingo",
+  "executable": "Lexi",
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "OpenLingo",
+  "name": "Lexi",
   "author": "",
   "singleInstance": false,
   "environment": "Production",
   "build": {
-    "appId": "com.OpenLingo.app",
-    "productName": "OpenLingo",
+    "appId": "com.Lexi.app",
+    "productName": "Lexi",
     "copyright": "Copyright © 2021",
     "buildVersion": "1.0.0",
     "compression": "maximum",

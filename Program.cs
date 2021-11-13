@@ -23,7 +23,7 @@ namespace OpenManga
                 {
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseElectron(args);  
-                    webBuilder.UseEnvironment("Development"); 
+                    webBuilder.UseEnvironment("Development");
                 });
     }
 }
