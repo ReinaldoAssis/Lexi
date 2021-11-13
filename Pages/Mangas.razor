@@ -3,11 +3,22 @@
 @inject IDialogService DialogService
 @inject ILocalStorageService localStorage
 
+<style>
+    .manga{
+        transition-duration: 0.3s;
+    }
+    
+    .manga:hover{
+        transition-duration: 0.3s;
+        transform: scale(1.05);
+    }
+</style>
+
 <MudText Typo="Typo.h3"><b>Mangas</b></MudText>
 <MudGrid Style="margin-left: 20px">
     @foreach (DataManga item in mangas)
     {
-            <div Style="max-height: 600px; margin-right: 12px; margin-left: 12px; max-width: 250px; margin-top: 50px">
+            <div class="manga" Style="max-height: 600px; margin-right: 12px; margin-left: 12px; max-width: 250px; margin-top: 50px">
                 <MudItem Class="d-flex align-center justify-center" Style="margin-top: 10px; max-width: 300px;" xs="3">
                     <MudCard Elevation="3">
                         <a href="@($"mangas/{item.name.Replace(" ","-")}")">
@@ -41,6 +52,7 @@
         public string name { get; set; }
         public string baseurl { get; set; }
         public string cover { get; set; }
+        public string lastread { get; set; } = "None";
         
         public DataManga(){}
 

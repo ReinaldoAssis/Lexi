@@ -1,10 +1,50 @@
 ﻿@page "/mangas/{id}/"
+@using static Mangas
+@using InputType = MudBlazor.InputType
+@inject ILocalStorageService localStorage
 
-<MudText Typo="Typo.h1">@id</MudText>
+<MudText Typo="Typo.h3">@id.Replace("-"," ")</MudText>
+
+<div style="width: 100%; margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; margin-bottom: 10px">
+    <img src="@manga.cover" style="width: 90%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4)"/>
+    <div>
+        <MudText Typo="Typo.h5">Last read: @manga.lastread</MudText>
+        <MudTextField Label="Base Url" Style="width: 70%" @bind-Value="@manga.baseurl" InputType="InputType.Text" T="string"></MudTextField>
+        @if (!volumeOK)
+        {
+            <MudAlert Style="margin-top:10px; width: 70%" Severity="Severity.Error">Volume parameter must be set!</MudAlert>
+        }
+        
+        @if (!pageOK)
+        {
+            <MudAlert Style="margin-top:10px;width: 70%" Severity="Severity.Error">Page parameter must be set!</MudAlert>
+        }
+        <br/>
+        <MudTextField Style="width: 70%" Label="Cover Url" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
+        
+    </div>
+</div>
+<MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
+    <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
+</MudTooltip>
 
 @code{
 
     [Parameter]
     public String id { get; set; }
+
+    bool fastdownload = true;
+    bool volumeOK = false;
+    bool pageOK = false;
+
+    public DataManga manga = new DataManga();
+
+    protected override async void OnInitialized()
+    {
+        List<DataManga> mangas = await localStorage.GetItemAsync<List<DataManga>>("mangas");
+        manga = mangas.Where(x => x.name == id.Replace("-", " ")).First();
+        await InvokeAsync(() => StateHasChanged());
+        base.OnInitialized();
+    }
 
 }
