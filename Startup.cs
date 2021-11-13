@@ -29,7 +29,9 @@ namespace OpenManga
         private async void CreateWindow()  
         {  
             var window = await Electron.WindowManager.CreateWindowAsync(); 
+            //window.RemoveMenu();
             window.SetAutoHideMenuBar(true);
+            window.SetTitle("Lexi");
             window.OnClosed += () => {  
                 Electron.App.Quit();  
             };  
