@@ -24,6 +24,19 @@
         <br/>
         <MudTextField Style="width: 70%" Label="Cover Url" TextChanged="@(()=>db.SaveManga(manga))" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
         
+        <MudExpansionPanels >
+            <MudExpansionPanel Style="margin-top:10px; width: 70%">
+                <TitleContent>
+                    <div class="d-flex">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" class="mr-3"></MudIcon>
+                        <MudText><strong>Download</strong></MudText>
+                    </div>
+                </TitleContent>
+                <ChildContent>
+                    Panel Content
+                </ChildContent>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
     </div>
 </div>
 <MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
@@ -33,7 +46,7 @@
 @code{
 
     [Parameter]
-    public string id { get; set; }
+    public string id { get; set; } = "";
 
     bool fastdownload = true;
     bool volumeOK = false;
@@ -65,9 +78,9 @@
 
     protected override async void OnInitialized()
     {
-        manga = await db.GetManga(id);
-        await InvokeAsync(() => StateHasChanged());
         db.SetLocalStorage(localStorage);
+        manga = await db.GetManga(id ?? "00000000000");
+        await InvokeAsync(() => StateHasChanged());
         base.OnInitialized();
     }
 
