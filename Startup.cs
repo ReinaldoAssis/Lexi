@@ -48,6 +48,7 @@ namespace OpenManga
             services.AddMudServices();
             services.AddBlazoredLocalStorage();
             services.AddSingleton<IDatabase, DataBase>();
+            services.AddElectron();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

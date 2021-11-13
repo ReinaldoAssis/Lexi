@@ -2,6 +2,8 @@
 @using static Mangas
 @using InputType = MudBlazor.InputType
 @using Database
+@using ElectronNET.API
+@using ElectronNET.API.Entities
 @inject ILocalStorageService localStorage
 @inject IDatabase db
 
@@ -23,24 +25,61 @@
         }
         <br/>
         <MudTextField Style="width: 70%" Label="Cover Url" TextChanged="@(()=>db.SaveManga(manga))" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
-        
-        <MudExpansionPanels >
-            <MudExpansionPanel Style="margin-top:10px; width: 70%">
-                <TitleContent>
-                    <div class="d-flex">
-                        <MudIcon Icon="@Icons.Material.Filled.Info" class="mr-3"></MudIcon>
-                        <MudText><strong>Download</strong></MudText>
-                    </div>
-                </TitleContent>
-                <ChildContent>
-                    Panel Content
-                </ChildContent>
-            </MudExpansionPanel>
-        </MudExpansionPanels>
+        <br/>
+        <MudItem Style="display: flex">
+            <MudItem xs="2" Style="margin-right: 10px; margin-bottom: 20px">
+                <MudTextField Label="Volume" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" InputType="InputType.Number" Style="text-align: center"></MudTextField>
+            </MudItem>
+            
+            <MudItem>
+                <MudButton EndIcon="@Icons.Filled.FileDownload" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
+            </MudItem>
+            
+            <MudItem>
+                <MudTooltip Text=@(manga.download_folder == "" ? "Select output path" : "Current output path "+manga.download_folder)>
+                    <MudIconButton OnClick="@OpenDialog" Icon="@Icons.Filled.FolderOpen"></MudIconButton>
+                </MudTooltip>
+
+            </MudItem>
+        </MudItem>
+        <div style="width: 70%">
+            <MudExpansionPanels Elevation="3">
+                <MudExpansionPanel Style="width: 70%" IsExpanded="true">
+                    <TitleContent>
+                        <div class="d-flex" style="width: 70%">
+                            <MudIcon Icon="@Icons.Material.Filled.Settings" class="mr-3"></MudIcon>
+                            <MudText><strong>Download Options</strong></MudText>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        <MudGrid>
+                            
+                            <MudItem xs="3">
+                                <MudTextField HelperText="Ex: 0-100" Label="Page range" T="string" Style="text-align: center"></MudTextField>
+                            </MudItem>
+                            
+                            
+                        </MudGrid>
+                    </ChildContent>
+                </MudExpansionPanel>
+                
+                <MudExpansionPanel Style="width: 70%" IsExpanded="false">
+                    <TitleContent>
+                        <div class="d-flex" style="width: 70%">
+                            <MudIcon Icon="@Icons.Material.Filled.Archive" class="mr-3"></MudIcon>
+                            <MudText><strong>Downloaded Content</strong></MudText>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        Panel Content
+                    </ChildContent>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        </div>
     </div>
 </div>
 <MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
-    <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
+    <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
 </MudTooltip>
 
 @code{
@@ -71,6 +110,20 @@
 
         db.SaveManga(manga);
 
+    }
+
+    async void OpenDialog()
+    {
+        var mainWindow = Electron.WindowManager.BrowserWindows.First();
+        var options = new OpenDialogOptions
+        {
+            Properties = new OpenDialogProperty[] {
+                OpenDialogProperty.openDirectory
+            }
+        };
+        string path = Electron.Dialog.ShowOpenDialogAsync(mainWindow, options).Result[0];
+        manga.download_folder = path;
+        db.SaveManga(manga);
     }
 
     //void CoverUrlChanged() => Save();
