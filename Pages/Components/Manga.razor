@@ -36,7 +36,7 @@
             
             <MudItem>
                 <MudTooltip Text="@($"Download chapter {manga.lastread}")">
-                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK||!volumeOK)" OnClick="@(()=>backend.DownloadManga(manga,download_volume.ToString()))" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
+                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK||!volumeOK)" OnClick="@(async ()=> backend.DownloadManga(manga,download_volume.ToString()))" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
                 </MudTooltip>
             </MudItem>
             
@@ -68,7 +68,7 @@
                             </MudItem>
                             
                             <MudItem xs="4" Style="min-width: 180px">
-                                <MudTextField HelperText="Ex: D3" @bind-Value="@manga.img_NumberFormat" TextChanged="@SafeSave" Label="Image Page Number Format" T="string" Style="text-align: center"></MudTextField>
+                                <MudTextField HelperText="Ex: D3" @bind-Value="@manga.img_NumberFormat" TextChanged="@SafeSave" Label="Page Number Format" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
                             
                             <MudItem xs="4" Style="min-width: 180px">
