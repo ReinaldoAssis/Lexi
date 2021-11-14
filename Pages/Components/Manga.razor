@@ -4,10 +4,13 @@
 @using Database
 @using ElectronNET.API
 @using ElectronNET.API.Entities
+@using Backend
 @inject ILocalStorageService localStorage
 @inject IDatabase db
+@inject IBackend backend
 
-<MudText Typo="Typo.h3">@(manga.name ?? "Loading...")</MudText>
+<MudTextField AutoFocus="false" DisableUnderLine="true" Style="font-size: 47px" TextChanged="@SafeSave" @bind-Value="@manga.name"></MudTextField>
+
 
 <div style="width: 100%; margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; margin-bottom: 10px">
     <img src="@manga.cover" style="width: 90%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4)"/>
@@ -28,11 +31,13 @@
         <br/>
         <MudItem Style="display: flex">
             <MudItem xs="2" Style="margin-right: 10px; margin-bottom: 20px">
-                <MudTextField Label="Volume" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" InputType="InputType.Number" Style="text-align: center"></MudTextField>
+                <MudTextField Label="Volume" @bind-Value="@download_volume" TextChanged="@SafeSave" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" InputType="InputType.Number" Style="text-align: center"></MudTextField>
             </MudItem>
             
             <MudItem>
-                <MudButton EndIcon="@Icons.Filled.FileDownload" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
+                <MudTooltip Text="@($"Download chapter {manga.lastread}")">
+                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK||!volumeOK)" OnClick="@(()=>backend.DownloadManga(manga,download_volume.ToString()))" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
+                </MudTooltip>
             </MudItem>
             
             <MudItem>
@@ -54,11 +59,24 @@
                     <ChildContent>
                         <MudGrid>
                             
-                            <MudItem xs="3">
+                            <MudItem xs="3" Style="min-width: 120px">
                                 <MudTextField HelperText="Ex: 0-100" Label="Page range" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
                             
+                            <MudItem xs="3" Style="min-width: 120px">
+                                <MudTextField HelperText="Ex: scan-page" @bind-Value="@manga.img_class" TextChanged="@SafeSave" Label="Image class" T="string" Style="text-align: center"></MudTextField>
+                            </MudItem>
                             
+                            <MudItem xs="4" Style="min-width: 180px">
+                                <MudTextField HelperText="Ex: D3" @bind-Value="@manga.img_NumberFormat" TextChanged="@SafeSave" Label="Image Page Number Format" T="string" Style="text-align: center"></MudTextField>
+                            </MudItem>
+                            
+                            <MudItem xs="4" Style="min-width: 180px">
+                                <MudTextField HelperText="Ex: D2" @bind-Value="@manga.volume_NumberFormat" TextChanged="@SafeSave" Label="Volume Number Format" T="string" Style="text-align: center"></MudTextField>
+                            </MudItem>
+
+
+
                         </MudGrid>
                     </ChildContent>
                 </MudExpansionPanel>
@@ -91,7 +109,10 @@
     bool volumeOK = false;
     bool pageOK = false;
 
+    int download_volume = 0;
+    
     public DataManga manga = new DataManga();
+    
 
     async void BaseUrlChanged()
     {
@@ -111,6 +132,8 @@
         db.SaveManga(manga);
 
     }
+
+    void SafeSave() => db.SaveManga(manga);
 
     async void OpenDialog()
     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Backend;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -48,6 +49,7 @@ namespace OpenManga
             services.AddMudServices();
             services.AddBlazoredLocalStorage();
             services.AddSingleton<IDatabase, DataBase>();
+            services.AddSingleton<IBackend, Backend.Backend>();
             services.AddElectron();
         }
 

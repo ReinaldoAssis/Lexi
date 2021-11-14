@@ -52,9 +52,13 @@
         public string name { get; set; }
         public string baseurl { get; set; }
         public string cover { get; set; }
-        public string lastread { get; set; } = "None";
+        public int lastread { get; set; } = 0;
         public string id { get; set; } = null;
         public string download_folder { get; set; } = "";
+        public string download_range { get; set; } = null;
+        public string img_class { get; set; } = null;
+        public string img_NumberFormat { get; set; } = null;
+        public string volume_NumberFormat { get; set; } = null;
         
         public DataManga(){}
 
