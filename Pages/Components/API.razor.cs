@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -8,9 +10,12 @@ using HtmlAgilityPack;
 using Gehtsoft.PDFFlow;
 using Gehtsoft.PDFFlow.Builder;
 using Gehtsoft.PDFFlow.Models.Enumerations;
+using Gehtsoft.PDFFlow.Models.Shared;
 
 namespace Backend
 {
+
+    
     interface IBackend
     {
         void DownloadManga(DataManga manga, string download_volume);
@@ -18,6 +23,29 @@ namespace Backend
     
     public partial class Backend : IBackend
     {
+        public class MangaPage
+        {
+            public byte[] Content { get; set; }
+            public string Url { get; set; }
+            public int Index { get; set; }
+            public float[] Size { get; set; } = new float[2];
+            
+            public MangaPage(){}
+
+            public MangaPage(string _url, int _index)
+            {
+                Index = _index;
+                Url = _url;
+            }
+            
+            public MangaPage(string _url, int _index, byte[] _content, float[] _size)
+            {
+                Index = _index;
+                Url = _url;
+                Size = _size;
+                Content = _content;
+            }
+        }
         public async void DownloadManga(DataManga manga, string download_volume)
         {
 
@@ -31,10 +59,10 @@ namespace Backend
             
         }
 
-        public async Task<Dictionary<int,string>> DownloadManga_ScrapPageForImageSrc(DataManga manga, string download_volume)
+        public async Task<List<MangaPage>> DownloadManga_ScrapPageForImageSrc(DataManga manga, string download_volume)
         {
 
-            Dictionary<int, string> retorno = new Dictionary<int, string>();
+            List<MangaPage> retorno = new List<MangaPage>();
 
             string[] _rangeSpl =  (manga.download_range ?? "").Split('-') ?? new []{"",""};
             int start_page;
@@ -77,11 +105,11 @@ namespace Backend
                 else img = htmlpage.DocumentNode.SelectSingleNode("//img");
 
                 string _final = img.Attributes["src"].Value;
-                
+
                 Console.WriteLine(_final ?? "img src is null");
 
-                retorno.Add(index,_final);
-                    
+                retorno.Add(new MangaPage(_final, index));
+
             });
 
             return retorno;
@@ -95,23 +123,29 @@ namespace Backend
             }
         }
 
-        async Task<Dictionary<int, byte[]>> DownloadAllImagesAsync(Dictionary<int, string> url_list)
+        async Task<List<MangaPage>> DownloadAllImagesAsync(List<MangaPage> url_list)
         {
-            Dictionary<int, byte[]> image_list = new Dictionary<int, byte[]>();
+            List<MangaPage> image_list = new List<MangaPage>();
             Parallel.ForEach(url_list, item =>
             {
-                image_list.Add(item.Key,DownloadImageFromURL(item.Value));
+                byte[] content = DownloadImageFromURL(item.Url);
+                float[] size = new[] {800f,1312f};
+                
+                //Console.WriteLine("IMAGE SIZE "+size[0]+"  "+size[1]);
+                
+                image_list.Add(new MangaPage(item.Url, item.Index, content, size));
             });
 
             return image_list;
         }
         
-        void ConvertToPdf(Dictionary<int,byte[]> url_list, string outputpath)
+        void ConvertToPdf(List<MangaPage> url_list, string outputpath)
         {
             var doc = DocumentBuilder.New();
             foreach (var page in url_list)
             {
-                doc.AddSection().SetMargins(0).SetOrientation(PageOrientation.Portrait).AddImage(page.Value).SetScale(ScalingMode.Stretch).SetAlignment(HorizontalAlignment.Center);
+                XSize size = new XSize(page.Size[0], page.Size[1]);
+                doc.AddSection().SetMargins(0).SetSize(size).AddImage(page.Content).SetAlignment(HorizontalAlignment.Center);
             }
             doc.Build(outputpath);
         }
