@@ -30,12 +30,29 @@ namespace Backend
             public int Index { get; set; }
             public float[] Size { get; set; } = new float[2];
             
+            public string tempPath { get; set; }
+            
             public MangaPage(){}
 
             public MangaPage(string _url, int _index)
             {
                 Index = _index;
                 Url = _url;
+            }
+
+            public MangaPage(string _url, int _index, string temp)
+            {
+                Index = _index;
+                Url = _url;
+                tempPath = temp;
+            }
+            
+            public MangaPage(string _url, int _index, string temp, byte[] content)
+            {
+                Index = _index;
+                Url = _url;
+                tempPath = temp;
+                Content = content;
             }
             
             public MangaPage(string _url, int _index, byte[] _content, float[] _size)
@@ -46,15 +63,24 @@ namespace Backend
                 Content = _content;
             }
         }
+        
         public async void DownloadManga(DataManga manga, string download_volume)
         {
 
+            // //gets a dictionary with the page index and it's respective string url to the image
+            // var url_list = await DownloadManga_ScrapPageForImageSrc(manga, download_volume);
+            // //downloads all images from the urls above async
+            // var all_images_downloaded = await DownloadAllImagesAsync(url_list);
+            // //appends image's bytes to pdf page and outputs the file
+            // ConvertToPdf(all_images_downloaded,manga.download_folder+'\\'+manga.name+".pdf");
+            // Console.WriteLine("ITS COMPLETE!");
+            
             //gets a dictionary with the page index and it's respective string url to the image
             var url_list = await DownloadManga_ScrapPageForImageSrc(manga, download_volume);
             //downloads all images from the urls above async
-            var all_images_downloaded = await DownloadAllImagesAsync(url_list);
+            var all_images_downloaded = await DownloadAllImagesInTempAsync(url_list);
             //appends image's bytes to pdf page and outputs the file
-            ConvertToPdf(all_images_downloaded,manga.download_folder+'\\'+manga.name+".pdf");
+            ConvertToPdfFromTempFiles(all_images_downloaded,manga.download_folder+'\\'+manga.name+".pdf");
             Console.WriteLine("ITS COMPLETE!");
             
         }
@@ -106,8 +132,6 @@ namespace Backend
 
                 string _final = img.Attributes["src"].Value;
 
-                Console.WriteLine(_final ?? "img src is null");
-
                 retorno.Add(new MangaPage(_final, index));
 
             });
@@ -120,6 +144,15 @@ namespace Backend
             using (var client = new WebClient())
             {
                 return client.DownloadData(url);
+            }
+        }
+        
+        void DownloadImageFromURLToTempFile(string url, string path)
+        {
+            using (var client = new WebClient())
+            {
+                client.DownloadFileAsync(new Uri(url),path);
+                client.Dispose();
             }
         }
 
@@ -139,6 +172,22 @@ namespace Backend
             return image_list;
         }
         
+        async Task<List<MangaPage>> DownloadAllImagesInTempAsync(List<MangaPage> url_list) //download all images to temporary path
+        {
+            List<MangaPage> image_list = new List<MangaPage>(); //list to store the updated manga's page
+            Parallel.ForEach(url_list, item =>
+            {
+                string tempPath = Path.GetTempFileName(); //temporary path to image
+                DownloadImageFromURLToTempFile(item.Url,tempPath); //downloads image to temp path
+                item.Content = DownloadImageFromURL(item.Url);
+                
+                //the new manga page object has an image url on the internet, an index representing it's position and a temporary path where the image is stored
+                image_list.Add(new MangaPage(item.Url, item.Index, tempPath, item.Content));
+            });
+
+            return image_list;
+        }
+        
         void ConvertToPdf(List<MangaPage> url_list, string outputpath)
         {
             var doc = DocumentBuilder.New();
@@ -148,6 +197,53 @@ namespace Backend
                 doc.AddSection().SetMargins(0).SetSize(size).AddImage(page.Content).SetAlignment(HorizontalAlignment.Center);
             }
             doc.Build(outputpath);
+        }
+
+        void TempFilesCleanup(List<MangaPage> mangapages)
+        {
+            foreach (var manga in mangapages)
+            {
+                var file = new FileInfo(manga.tempPath);
+                Console.WriteLine("Cleaning "+file.Name+" from temp");
+                file.Delete();
+            }
+        }
+        
+        async void ConvertToPdfFromTempFiles(List<MangaPage> url_list, string outputpath)
+        {
+            var doc = DocumentBuilder.New(); //pdf document
+            url_list = url_list.OrderBy(x => x.Index).ToList();
+            foreach (var page in url_list)
+            {
+                if (page.Index < 18)
+                {
+                    await Task.Delay(400);
+                    Console.WriteLine("Trying to load "+page.tempPath+" page index "+page.Index);
+                    XSize size = new XSize();
+                    using (FileStream fs = new FileStream(page.tempPath, FileMode.Open, FileAccess.Read))
+                    {
+                        using (Image img = Image.FromStream(fs))
+                        {
+                            //Image img = Image.FromFile(page.tempPath); //gets image from temp
+                            size = new XSize(img.Width, img.Height); //gets image size to set pdf page correctly
+                            Console.Write($" size {size.Width} x {size.Height}");
+                            doc.AddSection().SetMargins(0).SetSize(size).AddImage(page.Content).SetAlignment(HorizontalAlignment.Center);
+                        }
+                    }
+                    
+                }
+            }
+            doc.Build(outputpath);
+            //TempFilesCleanup(url_list);
+        }
+
+        public static byte[] ReadImgToByte(Stream input)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                input.CopyTo(ms);
+                return ms.ToArray();
+            }
         }
         
         
