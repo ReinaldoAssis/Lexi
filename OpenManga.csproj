@@ -7,7 +7,9 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
     <PackageReference Include="MudBlazor" Version="5.0.0" />
     <PackageReference Include="ElectronNET.API" Version="13.5.1" /> 
-    <PackageReference Include="Blazored.LocalStorage" Version="4.1.5" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.1.5" /> 
+    <PackageReference Include="PdfSharp" Version="1.50.5147" /> 
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">

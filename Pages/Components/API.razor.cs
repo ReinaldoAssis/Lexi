@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using static OpenManga.Pages.Mangas;
 using HtmlAgilityPack;
@@ -11,6 +13,9 @@ using Gehtsoft.PDFFlow;
 using Gehtsoft.PDFFlow.Builder;
 using Gehtsoft.PDFFlow.Models.Enumerations;
 using Gehtsoft.PDFFlow.Models.Shared;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 
 namespace Backend
 {
@@ -30,14 +35,17 @@ namespace Backend
             public int Index { get; set; }
             public float[] Size { get; set; } = new float[2];
             
+            public DataManga Parent { get; set; }
+            
             public string tempPath { get; set; }
             
             public MangaPage(){}
 
-            public MangaPage(string _url, int _index)
+            public MangaPage(string _url, int _index, DataManga manga=null)
             {
                 Index = _index;
                 Url = _url;
+                Parent = manga;
             }
 
             public MangaPage(string _url, int _index, string temp)
@@ -62,25 +70,18 @@ namespace Backend
                 Size = _size;
                 Content = _content;
             }
+            //sets the parent for this page, in this case the manga that it belongs to
         }
         
         public async void DownloadManga(DataManga manga, string download_volume)
         {
 
-            // //gets a dictionary with the page index and it's respective string url to the image
-            // var url_list = await DownloadManga_ScrapPageForImageSrc(manga, download_volume);
-            // //downloads all images from the urls above async
-            // var all_images_downloaded = await DownloadAllImagesAsync(url_list);
-            // //appends image's bytes to pdf page and outputs the file
-            // ConvertToPdf(all_images_downloaded,manga.download_folder+'\\'+manga.name+".pdf");
-            // Console.WriteLine("ITS COMPLETE!");
-            
             //gets a dictionary with the page index and it's respective string url to the image
             var url_list = await DownloadManga_ScrapPageForImageSrc(manga, download_volume);
             //downloads all images from the urls above async
             var all_images_downloaded = await DownloadAllImagesInTempAsync(url_list);
             //appends image's bytes to pdf page and outputs the file
-            ConvertToPdfFromTempFiles(all_images_downloaded,manga.download_folder+'\\'+manga.name+".pdf");
+            ConvertToPdfFromTempFiles(all_images_downloaded,manga);
             Console.WriteLine("ITS COMPLETE!");
             
         }
@@ -110,8 +111,13 @@ namespace Backend
 
             Parallel.For(0, 20, index =>
             {
+                index += 1;
+                
                 //TODO: check if format is passed
                 string _pageNumber = index.ToString();
+                
+                
+                
                 if (manga.img_NumberFormat != null)
                 {
                     _pageNumber = int.Parse(_pageNumber).ToString(manga.img_NumberFormat);
@@ -132,7 +138,7 @@ namespace Backend
 
                 string _final = img.Attributes["src"].Value;
 
-                retorno.Add(new MangaPage(_final, index));
+                retorno.Add(new MangaPage(_final, index, manga));
 
             });
 
@@ -177,28 +183,17 @@ namespace Backend
             List<MangaPage> image_list = new List<MangaPage>(); //list to store the updated manga's page
             Parallel.ForEach(url_list, item =>
             {
-                string tempPath = Path.GetTempFileName(); //temporary path to image
+                string tempPath = item.Parent.download_folder+"\\"+item.Index+".jpg"; //Path.GetTempFileName(); //temporary path to image
                 DownloadImageFromURLToTempFile(item.Url,tempPath); //downloads image to temp path
-                item.Content = DownloadImageFromURL(item.Url);
+                //item.Content = DownloadImageFromURL(item.Url);
                 
                 //the new manga page object has an image url on the internet, an index representing it's position and a temporary path where the image is stored
-                image_list.Add(new MangaPage(item.Url, item.Index, tempPath, item.Content));
+                image_list.Add(new MangaPage(item.Url, item.Index, tempPath));
             });
 
             return image_list;
         }
         
-        void ConvertToPdf(List<MangaPage> url_list, string outputpath)
-        {
-            var doc = DocumentBuilder.New();
-            foreach (var page in url_list)
-            {
-                XSize size = new XSize(page.Size[0], page.Size[1]);
-                doc.AddSection().SetMargins(0).SetSize(size).AddImage(page.Content).SetAlignment(HorizontalAlignment.Center);
-            }
-            doc.Build(outputpath);
-        }
-
         void TempFilesCleanup(List<MangaPage> mangapages)
         {
             foreach (var manga in mangapages)
@@ -208,44 +203,58 @@ namespace Backend
                 file.Delete();
             }
         }
-        
-        async void ConvertToPdfFromTempFiles(List<MangaPage> url_list, string outputpath)
+
+        async void ConvertToPdfFromTempFiles(List<MangaPage> mangas, DataManga manga)
         {
-            var doc = DocumentBuilder.New(); //pdf document
-            url_list = url_list.OrderBy(x => x.Index).ToList();
-            foreach (var page in url_list)
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            PdfDocument doc = new PdfDocument();
+            doc.Info.Title = manga.name;
+            mangas = mangas.OrderBy(x => x.Index).ToList();
+            string output = manga.download_folder + '\\' + manga.name + ".pdf";
+
+            foreach (var metaPage in mangas)
             {
-                if (page.Index < 18)
+                //await Task.Delay(700);
+                Print("Trying to add page "+metaPage.Index+" | "+metaPage.tempPath);
+                PdfPage pdfPage = doc.AddPage();
+                for (int t = 0; t < 6; t++)
                 {
-                    await Task.Delay(400);
-                    Console.WriteLine("Trying to load "+page.tempPath+" page index "+page.Index);
-                    XSize size = new XSize();
-                    using (FileStream fs = new FileStream(page.tempPath, FileMode.Open, FileAccess.Read))
+                    try
                     {
-                        using (Image img = Image.FromStream(fs))
+                        using (FileStream fs = new FileStream(metaPage.tempPath, FileMode.Open, FileAccess.Read))
                         {
-                            //Image img = Image.FromFile(page.tempPath); //gets image from temp
-                            size = new XSize(img.Width, img.Height); //gets image size to set pdf page correctly
-                            Console.Write($" size {size.Width} x {size.Height}");
-                            doc.AddSection().SetMargins(0).SetSize(size).AddImage(page.Content).SetAlignment(HorizontalAlignment.Center);
+                            using (XImage img = XImage.FromStream(fs))
+                            {
+                                pdfPage.Width = img.PixelWidth;
+                                pdfPage.Height = img.PixelHeight;
+                                //XImage img = XImage.FromFile(metaPage.tempPath); //TODO: implement pdf generation with pdfsharp
+                                XGraphics graphics = XGraphics.FromPdfPage(pdfPage);
+                                graphics.DrawImage(img,0,0);
+                                graphics.Dispose();
+                                //doc.InsertPage(metaPage.Index, pdfPage);
+                            }
                         }
+            
+                        break;
+            
+                    }
+                    catch (Exception e)
+                    {
+                        Print($"AGAIN trying index {metaPage.Index} for {t} time");
+                        Console.WriteLine(e);
+                        await Task.Delay(300);
                     }
                     
                 }
             }
-            doc.Build(outputpath);
-            //TempFilesCleanup(url_list);
-        }
+            
+            doc.Save(output);
+            //Process.Start(output);
 
-        public static byte[] ReadImgToByte(Stream input)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                input.CopyTo(ms);
-                return ms.ToArray();
-            }
         }
         
+        static void Print(string value) {Console.WriteLine(value);} 
+   
         
     }
 }
