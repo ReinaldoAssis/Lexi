@@ -145,14 +145,6 @@ namespace Backend
             return retorno;
         }
 
-        byte[] DownloadImageFromURL(string url)
-        {
-            using (var client = new WebClient())
-            {
-                return client.DownloadData(url);
-            }
-        }
-        
         void DownloadImageFromURLToTempFile(string url, string path)
         {
             using (var client = new WebClient())
@@ -162,22 +154,6 @@ namespace Backend
             }
         }
 
-        async Task<List<MangaPage>> DownloadAllImagesAsync(List<MangaPage> url_list)
-        {
-            List<MangaPage> image_list = new List<MangaPage>();
-            Parallel.ForEach(url_list, item =>
-            {
-                byte[] content = DownloadImageFromURL(item.Url);
-                float[] size = new[] {800f,1312f};
-                
-                //Console.WriteLine("IMAGE SIZE "+size[0]+"  "+size[1]);
-                
-                image_list.Add(new MangaPage(item.Url, item.Index, content, size));
-            });
-
-            return image_list;
-        }
-        
         async Task<List<MangaPage>> DownloadAllImagesInTempAsync(List<MangaPage> url_list) //download all images to temporary path
         {
             List<MangaPage> image_list = new List<MangaPage>(); //list to store the updated manga's page
@@ -185,8 +161,7 @@ namespace Backend
             {
                 string tempPath = item.Parent.download_folder+"\\"+item.Index+".jpg"; //Path.GetTempFileName(); //temporary path to image
                 DownloadImageFromURLToTempFile(item.Url,tempPath); //downloads image to temp path
-                //item.Content = DownloadImageFromURL(item.Url);
-                
+
                 //the new manga page object has an image url on the internet, an index representing it's position and a temporary path where the image is stored
                 image_list.Add(new MangaPage(item.Url, item.Index, tempPath));
             });
@@ -249,7 +224,6 @@ namespace Backend
             }
             
             doc.Save(output);
-            //Process.Start(output);
 
         }
         
