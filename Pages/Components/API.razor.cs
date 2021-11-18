@@ -105,7 +105,7 @@ namespace Backend
             {
                 start_page = int.Parse(_rangeSpl[0]); //try parse a range for downloading pages from manga's volume
                 end_page = int.Parse(_rangeSpl[1]);
-                repeat = int.Parse(manga.download_Repeat);
+                repeat = int.Parse(manga.download_Repeat)+1;
 
             } catch{}
 
@@ -228,7 +228,7 @@ namespace Backend
             mangas = mangas.OrderBy(x => x.Volume).ThenBy(x => x.Index).ToList();
             string output = manga.download_folder + '\\' + manga.name + ".pdf";
             
-            const int timesToTry = 5;
+            const int timesToTry = 15;
             bool force_stop = false;
             
             foreach (var metaPage in mangas)
@@ -264,11 +264,11 @@ namespace Backend
                         if (t == timesToTry)
                         {
                             
-                            Print($"Failed to add page {metaPage.Index}");
+                            Print($"Failed to add page {metaPage.Index} of ${metaPage.Volume}");
                             Console.WriteLine(e);
                             force_stop = true;
                         }
-                        await Task.Delay(600);
+                        await Task.Delay(800);
                     }
                     
                 }

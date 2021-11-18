@@ -31,7 +31,7 @@ namespace OpenManga
 
         private async void CreateWindow()  
         {  
-            var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions(){Width = 1000, Height = 700}); 
+            var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions(){Width = 1000, Height = 700,AutoHideMenuBar = true,Title = "Lexi"}); 
             //window.RemoveMenu();
             window.SetAutoHideMenuBar(true);
             window.SetTitle("Lexi");

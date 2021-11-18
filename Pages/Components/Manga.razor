@@ -13,7 +13,12 @@
 
 
 <div style="width: 100%; margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; margin-bottom: 10px">
-    <img src="@manga.cover" style="width: 90%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4)"/>
+    <div>
+        <img src="@manga.cover" style="width: 90%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4)"/>
+        <MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
+            <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
+        </MudTooltip>
+    </div>
     <div>
         <MudText Typo="Typo.h5">Last read: @manga.lastread</MudText>
         <MudTextField Label="Base Url" Style="width: 70%" TextChanged="@BaseUrlChanged" @bind-Value="@manga.baseurl" InputType="InputType.Text" T="string"></MudTextField>
@@ -21,30 +26,36 @@
         {
             <MudAlert Style="margin-top:10px; width: 70%" Severity="Severity.Error">Volume parameter must be set!</MudAlert>
         }
-        
+
         @if (!pageOK)
         {
             <MudAlert Style="margin-top:10px;width: 70%" Severity="Severity.Error">Page parameter must be set!</MudAlert>
         }
         <br/>
-        <MudTextField Style="width: 70%" Label="Cover Url" TextChanged="@(()=>db.SaveManga(manga))" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
+        <MudTextField Style="width: 70%" Label="Cover Url" TextChanged="@(() => db.SaveManga(manga))" @bind-Value="@manga.cover" InputType="InputType.Text" T="string"></MudTextField>
         <br/>
         <MudItem Style="display: flex">
             <MudItem xs="2" Style="margin-right: 10px; margin-bottom: 20px">
                 <MudTextField Label="Volume" @bind-Value="@download_volume" TextChanged="@SafeSave" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" InputType="InputType.Number" Style="text-align: center"></MudTextField>
             </MudItem>
-            
+
             <MudItem>
                 <MudTooltip Text="@($"Download chapter {manga.lastread}")">
-                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK||!volumeOK)" OnClick="@Download" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
+                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK || !volumeOK)" OnClick="@Download" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
                 </MudTooltip>
             </MudItem>
-            
+
+
             <MudItem>
-                <MudTooltip Text=@(manga.download_folder == "" ? "Select output path" : "Current output path "+manga.download_folder)>
+                <MudTooltip Text=@(manga.download_folder == "" ? "Select output path" : "Current output path " + manga.download_folder)>
                     <MudIconButton OnClick="@OpenDialog" Icon="@Icons.Filled.FolderOpen"></MudIconButton>
                 </MudTooltip>
 
+            </MudItem>
+            <MudItem>
+                <MudTooltip Text="Preview pages">
+                    <MudIconButton OnClick="@Preview" Icon="@Icons.Filled.Preview"></MudIconButton>
+                </MudTooltip>
             </MudItem>
         </MudItem>
         <div style="width: 70%">
@@ -58,11 +69,11 @@
                     </TitleContent>
                     <ChildContent>
                         <MudGrid>
-                            
+
                             <MudItem xs="3" Style="min-width: 120px">
                                 <MudTextField HelperText="Ex: 0-100" TextChanged="@SafeSave" @bind-Value="@manga.download_PageRange" Label="Page range" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
-                            
+
                             <MudItem xs="3" Style="min-width: 120px">
                                 <MudTextField HelperText="Ex: 2" TextChanged="@SafeSave" @bind-Value="@manga.download_Repeat" Label="Repeat" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
@@ -70,11 +81,11 @@
                             <MudItem xs="3" Style="min-width: 120px">
                                 <MudTextField HelperText="Ex: scan-page" @bind-Value="@manga.img_class" TextChanged="@SafeSave" Label="Image class" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
-                            
+
                             <MudItem xs="4" Style="min-width: 180px">
                                 <MudTextField HelperText="Ex: D3" @bind-Value="@manga.img_NumberFormat" TextChanged="@SafeSave" Label="Page Number Format" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
-                            
+
                             <MudItem xs="4" Style="min-width: 180px">
                                 <MudTextField HelperText="Ex: D2" @bind-Value="@manga.volume_NumberFormat" TextChanged="@SafeSave" Label="Volume Number Format" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
@@ -86,7 +97,7 @@
                         </MudGrid>
                     </ChildContent>
                 </MudExpansionPanel>
-                
+
                 <MudExpansionPanel Style="width: 70%" IsExpanded="false">
                     <TitleContent>
                         <div class="d-flex" style="width: 70%">
@@ -102,9 +113,7 @@
         </div>
     </div>
 </div>
-<MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
-    <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
-</MudTooltip>
+
 
 @code{
 
@@ -143,6 +152,14 @@
     {
         manga.lastread = download_volume;
         backend.DownloadManga(manga, download_volume.ToString());
+        manga.lastread = manga.lastread+int.Parse(manga.download_Repeat);
+        SafeSave();
+    }
+
+    void Preview()
+    {
+        BrowserWindowOptions ops = new BrowserWindowOptions() {Width = 1000, Height = 700, AutoHideMenuBar = true, Title = "Lexi"};
+        var win = Electron.WindowManager.CreateWindowAsync(ops,$"http://localhost:{BridgeSettings.WebPort}/mangas/settings/{manga.id}");
     }
 
     void SafeSave() => db.SaveManga(manga);
@@ -168,6 +185,7 @@
     {
         db.SetLocalStorage(localStorage);
         manga = await db.GetManga(id ?? "00000000000");
+        download_volume = manga.lastread + 1;
         await InvokeAsync(() => StateHasChanged());
         base.OnInitialized();
     }

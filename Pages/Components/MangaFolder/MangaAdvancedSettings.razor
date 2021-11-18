@@ -1,11 +1,37 @@
-﻿<MudGrid>
-    <MudCard>
-        <MudCardContent>
-            <MudText>Pages Auto Range</MudText>
-            <MudText Typo="Typo.body2">An element that gives away the range of pages</MudText>
-        </MudCardContent>
-        <MudCardActions>
-            <MudButton Variant="Variant.Text" Color="Color.Primary">Learn More</MudButton>
-        </MudCardActions>
-    </MudCard>
+﻿@page "/mangas/settings/{id}/"
+@using Database
+@using static Mangas
+@layout EmptyLayout
+
+@inject ILocalStorageService localStorage
+@inject IDatabase db
+
+<MudText Typo="Typo.h4">Advanced Settings</MudText>
+<MudDivider></MudDivider>
+<br style="margin-top:20px"/>
+<MudText Typo="Typo.h6">Pages Auto Range</MudText>
+<MudGrid>
+    <MudItem xs="6">
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Independent Url" T="string"></MudTextField>
+    </MudItem>
+    <MudItem xs="3">
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Class" T="string"></MudTextField>
+    </MudItem>
 </MudGrid>
+
+@code{
+
+    [Parameter]
+    public string id { get; set; } = "";
+
+    public DataManga Manga;
+    
+    protected override void OnInitialized()
+    {
+        db.SetLocalStorage(localStorage);
+        db.GetManga(id);
+
+        base.OnInitialized();
+    }
+
+}
