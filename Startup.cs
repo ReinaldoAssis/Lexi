@@ -15,6 +15,7 @@ using MudBlazor.Services;
 using ElectronNET.API;
 using Blazored.LocalStorage;
 using Database;
+using ElectronNET.API.Entities;
 
 
 namespace OpenManga
@@ -30,7 +31,7 @@ namespace OpenManga
 
         private async void CreateWindow()  
         {  
-            var window = await Electron.WindowManager.CreateWindowAsync(); 
+            var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions(){Width = 1000, Height = 700}); 
             //window.RemoveMenu();
             window.SetAutoHideMenuBar(true);
             window.SetTitle("Lexi");

@@ -36,7 +36,7 @@
             
             <MudItem>
                 <MudTooltip Text="@($"Download chapter {manga.lastread}")">
-                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK||!volumeOK)" OnClick="@(async ()=> backend.DownloadManga(manga,download_volume.ToString()))" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
+                    <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK||!volumeOK)" OnClick="@Download" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
                 </MudTooltip>
             </MudItem>
             
@@ -60,9 +60,13 @@
                         <MudGrid>
                             
                             <MudItem xs="3" Style="min-width: 120px">
-                                <MudTextField HelperText="Ex: 0-100" Label="Page range" T="string" Style="text-align: center"></MudTextField>
+                                <MudTextField HelperText="Ex: 0-100" TextChanged="@SafeSave" @bind-Value="@manga.download_PageRange" Label="Page range" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
                             
+                            <MudItem xs="3" Style="min-width: 120px">
+                                <MudTextField HelperText="Ex: 2" TextChanged="@SafeSave" @bind-Value="@manga.download_Repeat" Label="Repeat" T="string" Style="text-align: center"></MudTextField>
+                            </MudItem>
+
                             <MudItem xs="3" Style="min-width: 120px">
                                 <MudTextField HelperText="Ex: scan-page" @bind-Value="@manga.img_class" TextChanged="@SafeSave" Label="Image class" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
@@ -75,7 +79,9 @@
                                 <MudTextField HelperText="Ex: D2" @bind-Value="@manga.volume_NumberFormat" TextChanged="@SafeSave" Label="Volume Number Format" T="string" Style="text-align: center"></MudTextField>
                             </MudItem>
 
-
+                            <MudItem >
+                                <MudButton StartIcon="@Icons.Filled.SettingsApplications">Advanced</MudButton>
+                            </MudItem>
 
                         </MudGrid>
                     </ChildContent>
@@ -131,6 +137,12 @@
 
         db.SaveManga(manga);
 
+    }
+
+    async void Download()
+    {
+        manga.lastread = download_volume;
+        backend.DownloadManga(manga, download_volume.ToString());
     }
 
     void SafeSave() => db.SaveManga(manga);

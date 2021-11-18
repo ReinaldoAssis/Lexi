@@ -1,5 +1,6 @@
 ﻿@page "/mangas"
 @using OpenManga.Pages.Components
+@using System.Text.RegularExpressions
 @inject IDialogService DialogService
 @inject ILocalStorageService localStorage
 
@@ -55,10 +56,40 @@
         public int lastread { get; set; } = 0;
         public string id { get; set; } = null;
         public string download_folder { get; set; } = "";
-        public string download_range { get; set; } = null;
+        public string download_PageRange { get; set; } = null;
+        public string download_Repeat { get; set; } = null;
         public string img_class { get; set; } = null;
         public string img_NumberFormat { get; set; } = null;
         public string volume_NumberFormat { get; set; } = null;
+        public PageIdentifier pageIdentifier { get; set; }
+
+        public class PageIdentifier
+        {
+            public string IdentifierHtmlClass { get; set; }
+            public List<int> ParsedNumbers { get; set; }
+            public int StartPage { get; set; }
+            public int EndPage { get; set; }
+
+            public List<int> ParseNumbers(string requestResult)
+            {
+                List<int> ints = new List<int>();
+                Regex rgx = new Regex("[^0-9-/]");
+                foreach (var c in rgx.Replace(requestResult, "").ToArray())
+                {
+                    ints.Add(int.Parse(c+""));
+                }
+                ParsedNumbers = ints;
+                return ints;
+            }
+
+            public int[] GetPageRange()
+            {
+                ParsedNumbers.Sort();
+                StartPage = ParsedNumbers[0];
+                EndPage = ParsedNumbers[1];
+                return new []{ParsedNumbers[0],ParsedNumbers[1]};
+            }
+        }
         
         public DataManga(){}
 
