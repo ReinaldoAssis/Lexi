@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -23,11 +24,16 @@ namespace Backend
     
     interface IBackend
     {
-        void DownloadManga(DataManga manga, string download_volume);
+        void DownloadManga(DataManga manga, string download_volume); //TODO: remove download_voume arg
+        Dictionary<string, string> GetLanguageFlags();
     }
     
     public partial class Backend : IBackend
     {
+        public List<MangaPage> global_pages = new List<MangaPage>();
+
+        public DataManga global_manga = new DataManga();
+        //public SenhorManga global_manga = new SenhorManga();
         public class MangaPage
         {
             public byte[] Content { get; set; }
@@ -40,6 +46,11 @@ namespace Backend
             public string tempPath { get; set; }
             
             public int Volume { get; set; }
+
+            public bool Valid { get; set; } = true;
+
+
+            public bool FinishedDownload { get; set; } = false;
             
             public MangaPage(){}
 
@@ -76,18 +87,23 @@ namespace Backend
             }
             //sets the parent for this page, in this case the manga that it belongs to
         }
-        
+
+
         public async void DownloadManga(DataManga manga, string download_volume)
         {
-
+            global_manga = manga;
             //gets a dictionary with the page index and it's respective string url to the image
-            var url_list = await DownloadManga_ScrapPageForImageSrc(manga);
+            global_pages = await DownloadManga_ScrapPageForImageSrc(manga);
             //downloads all images from the urls above async
-            var all_images_downloaded = await DownloadAllImagesInTempAsync(url_list);
-            
-            //appends image's bytes to pdf page and outputs the file
-            
-            ConvertToPdfFromTempFiles(all_images_downloaded,manga);
+            DownloadAllImagesInTempAsync(global_pages);//global_pages = await DownloadAllImagesInTempAsync(global_pages);
+
+            if (!global_pages.Exists(x => x.FinishedDownload == false))
+            {
+                //appends image's bytes to pdf page and outputs the file
+                Print("All files were downloaded");
+            }
+
+
 
         }
 
@@ -105,24 +121,24 @@ namespace Backend
             {
                 start_page = int.Parse(_rangeSpl[0]); //try parse a range for downloading pages from manga's volume
                 end_page = int.Parse(_rangeSpl[1]);
-                repeat = int.Parse(manga.download_Repeat)+1;
 
             } catch{}
-
-
+            try{repeat = int.Parse(manga.download_Repeat)+1;}catch{}
+            
             //Checks for custom volume number format
             manga.volume_NumberFormat = manga.volume_NumberFormat ?? "D1";
             
             //gets the url from manga, [volume] is replaced by current volume to download
 
+            if (end_page == -1) end_page = 30;
+
             Parallel.For(0, repeat, v =>
             {
                 string url = GetReplacedUrl(manga.baseurl, "volume", manga.lastread+v, manga.volume_NumberFormat);
                 Print($"Downloading volume {v}");
-                Parallel.For(start_page, end_page == -1 ? 20 : end_page, index =>
+                Parallel.For(start_page, end_page, index =>
                 { //TODO: change default non defined max search page number
                     
-                    index += 1;
 
                     //TODO: check if format is passed
                     manga.img_NumberFormat = manga.img_NumberFormat ?? "D1";
@@ -161,20 +177,52 @@ namespace Backend
                     }
 
                     if (_final != null) retorno.Add(new MangaPage(_final, index, manga, manga.lastread+v));
+                    
+                    index += 1;
 
                 });
 
 
             });
             
-
             return retorno;
+
         }
 
-        void DownloadImageFromURLToTempFile(string url, string path)
+        private void DownloadImageCompletedCallback(object sender, AsyncCompletedEventArgs e, MangaPage page)
+        {
+            if (e.Cancelled)
+            {
+                Console.WriteLine("File download canceled");
+            }
+
+            if (e.Error != null)
+            {
+                Console.WriteLine($"Page {page.Index} of {page.Volume} Volume is empty, removing from list...");
+                global_pages.Find(x => x.Index == page.Index && x.Volume == page.Volume).Valid = false;
+                //Console.WriteLine(e.Error.ToString());
+            }
+
+            try
+            {
+                if(global_pages == null) Print("GLOBAL PAGES IS NULL MOTHER FUCKER");
+                if(global_pages.Find(x => x.Url == page.Url) == null) Print("FIND IS NULL MOTHER FUCKER");
+                global_pages.Find(x => x.Url == page.Url).FinishedDownload = true;
+    
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                Print($"Ocorreu um erro ao alterar finished download! pagina {page.Index} volume {page.Volume}");
+            }
+            
+        }
+
+        void DownloadImageFromURLToTempFile(string url, string path, MangaPage page)
         {
             using (var client = new WebClient())
             {
+                client.DownloadFileCompleted += (sender,e) => DownloadImageCompletedCallback(sender,e,page);
                 client.DownloadFileAsync(new Uri(url),path);
                 client.Dispose();
             }
@@ -185,19 +233,23 @@ namespace Backend
             return url.Replace($"[{tag}]", index.ToString(format), StringComparison.OrdinalIgnoreCase);
         }
 
-        async Task<List<MangaPage>> DownloadAllImagesInTempAsync(List<MangaPage> url_list) //download all images to temporary path
+        void DownloadAllImagesInTempAsync(List<MangaPage> url_list) //download all images to temporary path
         {
             List<MangaPage> image_list = new List<MangaPage>(); //list to store the updated manga's page
+            int i = 0;
             Parallel.ForEach(url_list, item =>
             {
+                i++;
                 string tempPath = item.Parent.download_folder+"\\"+$"{item.Volume}_{item.Index}.jpg"; //Path.GetTempFileName(); //temporary path to image
-                DownloadImageFromURLToTempFile(item.Url,tempPath); //downloads image to temp path
+                
+                DownloadImageFromURLToTempFile(item.Url,tempPath, item); //downloads image to temp path
 
                 //the new manga page object has an image url on the internet, an index representing it's position and a temporary path where the image is stored
                 image_list.Add(new MangaPage(item.Url, item.Index, tempPath, item.Volume));
+                if(i == url_list.Count) ConvertToPdfFromTempFiles(image_list,global_manga);
             });
 
-            return image_list;
+           //return image_list;
         }
         
         async void TempFilesCleanup(List<MangaPage> mangapages)
@@ -225,21 +277,28 @@ namespace Backend
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             PdfDocument doc = new PdfDocument();
             doc.Info.Title = manga.name;
+            //order manga pages in such a way as to separate invalid pages from valid ones and then volume -> pages index
             mangas = mangas.OrderBy(x => x.Volume).ThenBy(x => x.Index).ToList();
             string output = manga.download_folder + '\\' + manga.name + ".pdf";
             
             const int timesToTry = 15;
             bool force_stop = false;
-            
+
+            //clean up of invalid pages
+            //Console.WriteLine("Removed x pages "+ mangas.RemoveAll(x => x.Valid == false)); 
+
             foreach (var metaPage in mangas)
             {
+
+                if(metaPage.Valid == false || metaPage.FinishedDownload == false) continue;
+                
                 //await Task.Delay(700);
                 //Print("Trying to add page "+metaPage.Index+" | "+metaPage.tempPath);
                 PdfPage pdfPage = doc.AddPage();
                 for (int t = 0; t < timesToTry+1; t++)
                 {
                     if (force_stop) break;
-                    
+
                     try
                     {
                         using (FileStream fs = new FileStream(metaPage.tempPath, FileMode.Open, FileAccess.Read))
@@ -264,7 +323,7 @@ namespace Backend
                         if (t == timesToTry)
                         {
                             
-                            Print($"Failed to add page {metaPage.Index} of ${metaPage.Volume}");
+                            Print($"Failed to add page {metaPage.Index} of ${metaPage.Volume}, page is {metaPage.Valid}");
                             Console.WriteLine(e);
                             force_stop = true;
                         }
@@ -281,7 +340,21 @@ namespace Backend
         }
         
         static void Print(string value) {Console.WriteLine(value);} 
-   
         
+        //---------------------------------------------------------------------------------------
+
+        public Dictionary<string, string> LanguageFlags = new Dictionary<string, string>()
+        {
+            {"english","us.svg"}
+            ,{"portuguese","br.svg"},
+            {"french","fr.svg"}
+        };
+
+        public Dictionary<string, string> GetLanguageFlags()
+        {
+            return LanguageFlags;
+        }
+
+
     }
 }

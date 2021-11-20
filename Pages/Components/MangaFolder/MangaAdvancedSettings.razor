@@ -14,9 +14,24 @@
     <MudItem xs="6">
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Independent Url" T="string"></MudTextField>
     </MudItem>
-    <MudItem xs="3">
+    <MudItem xs="6" Style="display: flex">
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Class" T="string"></MudTextField>
+        <MudTooltip Text="Test page auto range">
+            <MudIconButton OnClick="@(()=>_showAutoRangeTest = !_showAutoRangeTest)" Icon="@(!_showAutoRangeTest ? Icons.Filled.ArrowDownward : Icons.Filled.ArrowUpward)"></MudIconButton>
+        </MudTooltip>
     </MudItem>
+    @if (_showAutoRangeTest)
+    {
+        <MudItem xs="3">
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Volume" T="string"></MudTextField>
+        </MudItem>
+        <MudItem xs="3" Style="display: flex">
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Page" T="string"></MudTextField>
+            <MudTooltip Text="Run test">
+                <MudIconButton Icon="@Icons.Filled.PlayArrow" Color="Color.Success" ></MudIconButton>
+            </MudTooltip>
+        </MudItem>
+    }
 </MudGrid>
 
 @code{
@@ -25,6 +40,8 @@
     public string id { get; set; } = "";
 
     public DataManga Manga;
+
+    bool _showAutoRangeTest = false;
     
     protected override void OnInitialized()
     {

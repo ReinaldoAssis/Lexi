@@ -1,14 +1,36 @@
 ﻿@using Newtonsoft.Json.Linq
 @using Newtonsoft.Json
 @using Database
+@using Backend
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IDatabase database
+@inject IBackend backend
 
 <MudGrid Style="padding: 15px">
-    <MudItem xs="12">
+    <MudItem xs="6">
         <MudTextField @bind-Value="name" Label="Name" Variant="Variant.Outlined"></MudTextField>
     </MudItem>
-    
+    <MudItem xs="6">
+        <MudSelect @bind-Value="@language" @onchange="@(()=>Console.WriteLine(language))" Label="Language" Variant="Variant.Outlined" OffsetY="true">
+
+            @foreach (var lang in backend.GetLanguageFlags())
+            {
+                <MudSelectItem Value="@(String.Concat(lang.Key[0].ToString().ToUpper(),lang.Key.AsSpan(1)))">
+                    
+                    <MudGrid style="display: flex">
+                                        <MudItem xs="1">
+                                            <img height="14" class="mr-1" src="@($"src/flags/4x3/{lang.Value}")"/>
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                        <p>@(String.Concat(lang.Key[0].ToString().ToUpper(),lang.Key.AsSpan(1)))</p>
+                                        </MudItem>
+                                    </MudGrid>
+                </MudSelectItem>
+            }
+            
+        </MudSelect>
+    </MudItem>
+
     <MudItem xs="12">
         <MudTextField @bind-Value="baseurl" Label="Baseurl" Variant="Variant.Outlined"></MudTextField>
     </MudItem>
@@ -31,7 +53,7 @@
     public String name;
     public String baseurl;
     public String cover;
-    
+    public string language = "Portuguese";
     
     protected override void OnInitialized()
     {

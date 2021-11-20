@@ -40,7 +40,7 @@
             </MudItem>
 
             <MudItem>
-                <MudTooltip Text="@($"Download chapter {manga.lastread}")">
+                <MudTooltip Text="@($"Download chapter {download_volume}")">
                     <MudButton EndIcon="@Icons.Filled.FileDownload" Disabled="@(!pageOK || !volumeOK)" OnClick="@Download" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Color="Color.Primary">Download</MudButton>
                 </MudTooltip>
             </MudItem>
@@ -91,7 +91,7 @@
                             </MudItem>
 
                             <MudItem >
-                                <MudButton StartIcon="@Icons.Filled.SettingsApplications">Advanced</MudButton>
+                                <MudButton StartIcon="@Icons.Filled.SettingsApplications" OnClick="@AdvancedSetting">Advanced</MudButton>
                             </MudItem>
 
                         </MudGrid>
@@ -152,17 +152,27 @@
     {
         manga.lastread = download_volume;
         backend.DownloadManga(manga, download_volume.ToString());
-        manga.lastread = manga.lastread+int.Parse(manga.download_Repeat);
+        manga.lastread = manga.lastread+int.Parse(manga.download_Repeat ?? "1");
         SafeSave();
     }
 
     void Preview()
     {
+        // BrowserWindowOptions ops = new BrowserWindowOptions() {Width = 1000, Height = 700, AutoHideMenuBar = true, Title = "Lexi"};
+        // var win = Electron.WindowManager.CreateWindowAsync(ops,$"http://localhost:{BridgeSettings.WebPort}/mangas/settings/{manga.id}");
+    }
+
+    void AdvancedSetting()
+    {
         BrowserWindowOptions ops = new BrowserWindowOptions() {Width = 1000, Height = 700, AutoHideMenuBar = true, Title = "Lexi"};
         var win = Electron.WindowManager.CreateWindowAsync(ops,$"http://localhost:{BridgeSettings.WebPort}/mangas/settings/{manga.id}");
     }
 
-    void SafeSave() => db.SaveManga(manga);
+    async void SafeSave()
+    {
+        db.SaveManga(manga);
+        await InvokeAsync(() => StateHasChanged());
+    }
 
     async void OpenDialog()
     {
@@ -185,7 +195,7 @@
     {
         db.SetLocalStorage(localStorage);
         manga = await db.GetManga(id ?? "00000000000");
-        download_volume = manga.lastread + 1;
+        download_volume = manga.lastread;
         await InvokeAsync(() => StateHasChanged());
         base.OnInitialized();
     }

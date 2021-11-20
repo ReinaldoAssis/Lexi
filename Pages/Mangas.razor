@@ -1,6 +1,7 @@
 ﻿@page "/mangas"
 @using OpenManga.Pages.Components
 @using System.Text.RegularExpressions
+@using Backend
 @inject IDialogService DialogService
 @inject ILocalStorageService localStorage
 
@@ -62,6 +63,13 @@
         public string img_NumberFormat { get; set; } = null;
         public string volume_NumberFormat { get; set; } = null;
         public PageIdentifier pageIdentifier { get; set; }
+        public Language Idiom { get; set; }
+
+        public class Language
+        {
+            public string Name { get; set; }
+            public string Flag { get; set; }
+        }
 
         public class PageIdentifier
         {
