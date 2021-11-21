@@ -96,6 +96,7 @@ namespace Backend
             global_pages = await DownloadManga_ScrapPageForImageSrc(manga);
             //downloads all images from the urls above async
             DownloadAllImagesInTempAsync(global_pages);//global_pages = await DownloadAllImagesInTempAsync(global_pages);
+            ConvertToPdfFromTempFiles(global_pages,manga);
 
             if (!global_pages.Exists(x => x.FinishedDownload == false))
             {
@@ -218,12 +219,14 @@ namespace Backend
             
         }
 
-        void DownloadImageFromURLToTempFile(string url, string path, MangaPage page)
+        private async Task DownloadImageFromURLToTempFile(MangaPage page)
         {
             using (var client = new WebClient())
             {
+                string tempPath = page.Parent.download_folder+"\\"+$"{page.Volume}_{page.Index}.jpg";
+                global_pages.Find(x => x.Url == page.Url).tempPath = tempPath;
                 client.DownloadFileCompleted += (sender,e) => DownloadImageCompletedCallback(sender,e,page);
-                client.DownloadFileAsync(new Uri(url),path);
+                await client.DownloadFileTaskAsync(new Uri(page.Url),tempPath);
                 client.Dispose();
             }
         }
@@ -233,23 +236,25 @@ namespace Backend
             return url.Replace($"[{tag}]", index.ToString(format), StringComparison.OrdinalIgnoreCase);
         }
 
-        void DownloadAllImagesInTempAsync(List<MangaPage> url_list) //download all images to temporary path
+        async void DownloadAllImagesInTempAsync(List<MangaPage> url_list) //download all images to temporary path
         {
-            List<MangaPage> image_list = new List<MangaPage>(); //list to store the updated manga's page
-            int i = 0;
-            Parallel.ForEach(url_list, item =>
-            {
-                i++;
-                string tempPath = item.Parent.download_folder+"\\"+$"{item.Volume}_{item.Index}.jpg"; //Path.GetTempFileName(); //temporary path to image
-                
-                DownloadImageFromURLToTempFile(item.Url,tempPath, item); //downloads image to temp path
+            //List<MangaPage> image_list = new List<MangaPage>(); //list to store the updated manga's page
+            //int i = 0;
+            // Parallel.ForEach(url_list, item =>
+            // {
+            //     i++;
+            //     string tempPath = item.Parent.download_folder+"\\"+$"{item.Volume}_{item.Index}.jpg"; //Path.GetTempFileName(); //temporary path to image
+            //     
+            //     DownloadImageFromURLToTempFile(item.Url,tempPath, item); //downloads image to temp path
+            //
+            //     //the new manga page object has an image url on the internet, an index representing it's position and a temporary path where the image is stored
+            //     image_list.Add(new MangaPage(item.Url, item.Index, tempPath, item.Volume));
+            //     if(i == url_list.Count) ConvertToPdfFromTempFiles(image_list,global_manga);
+            // });
 
-                //the new manga page object has an image url on the internet, an index representing it's position and a temporary path where the image is stored
-                image_list.Add(new MangaPage(item.Url, item.Index, tempPath, item.Volume));
-                if(i == url_list.Count) ConvertToPdfFromTempFiles(image_list,global_manga);
-            });
+            await Task.WhenAll(url_list.Select(page => DownloadImageFromURLToTempFile(page)));
 
-           //return image_list;
+            //return image_list;
         }
         
         async void TempFilesCleanup(List<MangaPage> mangapages)

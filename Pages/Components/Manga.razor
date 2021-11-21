@@ -76,8 +76,17 @@
 
             <MudItem>
                 <MudTooltip Text=@(manga.download_folder == "" ? "Select output path" : "Current output path " + manga.download_folder)>
-                    <MudIconButton OnClick="@OpenDialog" Icon="@Icons.Filled.FolderOpen"></MudIconButton>
+                    <MudIconButton @onclick="@OpenDialog" @onmouseup="@(args => FolderRightClick(args))"  Icon="@Icons.Filled.FolderOpen"></MudIconButton>
                 </MudTooltip>
+                    @if (_showFolderMenu)
+                    {
+                        <MudPaper Style="position: absolute; z-index: 2; width: 180px;">
+                            @* TODO: BETTER OUT FOCUS HANDLER! *@
+                            <MudList Clickable="true" Style="width: fit-content" @onmouseout="@(async () => { await Task.Delay(2000); _showFolderMenu = false;})">
+                                <MudListItem OnClick="@ShowMangaInExplorer">Open up in explorer</MudListItem>
+                            </MudList>
+                        </MudPaper>
+                    }
 
             </MudItem>
             <MudItem>
@@ -155,6 +164,8 @@
     int download_volume = 0;
     
     public DataManga manga = new DataManga();
+
+    bool _showFolderMenu = false;
     
 
     async void BaseUrlChanged()
@@ -205,16 +216,41 @@
 
     async void OpenDialog()
     {
-        var mainWindow = Electron.WindowManager.BrowserWindows.First();
-        var options = new OpenDialogOptions
+        try
         {
-            Properties = new OpenDialogProperty[] {
-                OpenDialogProperty.openDirectory
-            }
-        };
-        string path = Electron.Dialog.ShowOpenDialogAsync(mainWindow, options).Result[0];
-        manga.download_folder = path;
-        db.SaveManga(manga);
+            var mainWindow = Electron.WindowManager.BrowserWindows.First();
+            var options = new OpenDialogOptions
+            {
+                Properties = new OpenDialogProperty[]
+                {
+                    OpenDialogProperty.openDirectory
+                }
+            };
+            string path = Electron.Dialog.ShowOpenDialogAsync(mainWindow, options).Result[0];
+            manga.download_folder = path;
+            db.SaveManga(manga);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    void FolderRightClick(MouseEventArgs e)
+    {
+        if (e.Button == 2) _showFolderMenu = !_showFolderMenu;
+    }
+
+    void ShowMangaInExplorer()
+    {
+        try
+        {
+            Electron.Shell.ShowItemInFolderAsync(manga.download_folder);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     //void CoverUrlChanged() => Save();
