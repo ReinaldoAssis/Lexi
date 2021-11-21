@@ -95,7 +95,16 @@ namespace Backend
             //gets a dictionary with the page index and it's respective string url to the image
             global_pages = await DownloadManga_ScrapPageForImageSrc(manga);
             //downloads all images from the urls above async
-            DownloadAllImagesInTempAsync(global_pages);//global_pages = await DownloadAllImagesInTempAsync(global_pages);
+            //DownloadAllImagesInTempAsync(global_pages);//global_pages = await DownloadAllImagesInTempAsync(global_pages);
+            try
+            {
+                await Task.WhenAll(global_pages.Select(page => DownloadImageFromURLToTempFile(page)));
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
             ConvertToPdfFromTempFiles(global_pages,manga);
 
             if (!global_pages.Exists(x => x.FinishedDownload == false))
