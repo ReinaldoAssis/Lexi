@@ -2,6 +2,8 @@
 @using Newtonsoft.Json
 @using Database
 @using Backend
+@using static Mangas.DataManga;
+
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IDatabase database
 @inject IBackend backend
@@ -70,8 +72,10 @@
         // //appends the new manga to the database variable and serializes it
         // //await database.Write(name, listMangas.Append(new Mangas.DataManga(name,baseurl,cover)));
         // await localStorage.SetItemAsync("mangas", listMangas.Append());
+
+        Language lang = new Language(language, backend.GetLanguageFlags()[language.ToLower()]);
         
-        database.SaveManga(new Mangas.DataManga(name, baseurl, cover));
+        database.SaveManga(new Mangas.DataManga(name, baseurl, cover, lang=lang));
 
         dialog.Close(DialogResult.Ok(true)); //closes the dialog with result OK
     }

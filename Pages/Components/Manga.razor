@@ -15,9 +15,37 @@
 <div style="width: 100%; margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; margin-bottom: 10px">
     <div>
         <img src="@manga.cover" style="width: 90%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4)"/>
-        <MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
-            <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
-        </MudTooltip>
+        <div style="display: flex">
+            <MudTooltip Text="To enable fast download, please download at least once." Placement="Placement.End" Delayed="1">
+                <MudButton EndIcon="@Icons.Filled.FlashOn" Variant="Variant.Filled" Size="MudBlazor.Size.Large" Disabled="@fastdownload" Color="Color.Primary">Fast Download</MudButton>
+            </MudTooltip>
+
+            @if (manga.Idiom != null)
+            {
+            <MudItem xs="6" Style="margin-left: 10px">
+                    <MudSelect @bind-Value="@manga.Idiom.Name"  Label="Language" Margin="Margin.Dense" OffsetY="true">
+            
+                        @foreach (var lang in backend.GetLanguageFlags())
+                        {
+                            <MudSelectItem Value="@(String.Concat(lang.Key[0].ToString().ToUpper(),lang.Key.AsSpan(1)))">
+                                
+                                <MudGrid style="display: flex">
+                                                    <MudItem xs="1">
+                                                        <img height="14" class="mr-1" src="@($"src/flags/4x3/{lang.Value}")"/>
+                                                    </MudItem>
+                                                    <MudItem xs="6">
+                                                    <p>@(String.Concat(lang.Key[0].ToString().ToUpper(),lang.Key.AsSpan(1)))</p>
+                                                    </MudItem>
+                                                </MudGrid>
+                            </MudSelectItem>
+                        }
+                        
+                    </MudSelect>
+                </MudItem>
+                
+            }
+        </div>
+                
     </div>
     <div>
         <MudText Typo="Typo.h5">Last read: @manga.lastread</MudText>
@@ -167,6 +195,7 @@
         BrowserWindowOptions ops = new BrowserWindowOptions() {Width = 1000, Height = 700, AutoHideMenuBar = true, Title = "Lexi"};
         var win = Electron.WindowManager.CreateWindowAsync(ops,$"http://localhost:{BridgeSettings.WebPort}/mangas/settings/{manga.id}");
     }
+    
 
     async void SafeSave()
     {
@@ -196,6 +225,7 @@
         db.SetLocalStorage(localStorage);
         manga = await db.GetManga(id ?? "00000000000");
         download_volume = manga.lastread;
+        Console.WriteLine(manga.Idiom.Flag);
         await InvokeAsync(() => StateHasChanged());
         base.OnInitialized();
     }

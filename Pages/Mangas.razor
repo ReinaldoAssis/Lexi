@@ -4,6 +4,7 @@
 @using Backend
 @inject IDialogService DialogService
 @inject ILocalStorageService localStorage
+@inject IBackend backend
 
 <style>
     .manga{
@@ -34,7 +35,8 @@
                         
                         <MudCardActions>
                             <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/mangas/magi">Download</MudButton>
-                            <MudButton Variant="Variant.Text" Color="Color.Primary">Edit</MudButton>
+                            @* <MudButton Variant="Variant.Text" Color="Color.Primary">Edit</MudButton> *@
+                            <img height="14" class="mr-1" src="@($"src/flags/4x3/{backend.GetLanguageFlags()[item.Idiom.Name.ToLower()]}")"/>
                         </MudCardActions>
                     </MudCard>
                 </MudItem>
@@ -69,6 +71,13 @@
         {
             public string Name { get; set; }
             public string Flag { get; set; }
+
+            public Language(string name, string flag)
+            {
+                Name = name;
+                Flag = flag;
+            }
+            
         }
 
         public class PageIdentifier
@@ -101,11 +110,12 @@
         
         public DataManga(){}
 
-        public DataManga(string _name, string _baseurl, string _cover)
+        public DataManga(string _name, string _baseurl, string _cover, Language lang=null)
         {
             name = _name;
             baseurl = _baseurl;
             cover = _cover;
+            Idiom = lang ?? new Language("","");
         }
 
         public override string ToString()
