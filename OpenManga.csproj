@@ -9,7 +9,8 @@
     <PackageReference Include="ElectronNET.API" Version="13.5.1" /> 
     <PackageReference Include="Blazored.LocalStorage" Version="4.1.5" /> 
     <PackageReference Include="PdfSharp" Version="1.50.5147" /> 
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" /> 
+    <PackageReference Include="Tesseract.Net.SDK" Version="4.0.411" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">

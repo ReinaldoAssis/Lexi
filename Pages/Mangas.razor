@@ -29,7 +29,7 @@
                             <MudCardContent Style="padding-right: 60px">
                                 <MudText Style="font-size: 110%" Typo="Typo.h5"><b>@(item.name.Length <= 17 ? item.name : item.name.Substring(0,17)+"...")</b></MudText>
                                 @* <MudText Typo="Typo.body2">There isn't a description yet.</MudText> *@
-                                <MudText Typo="Typo.body2">Last downloaded: V10</MudText>
+                                <MudText Typo="Typo.body2">Last downloaded: @(item.lastread)</MudText>
                             </MudCardContent>
                         </a>
                         

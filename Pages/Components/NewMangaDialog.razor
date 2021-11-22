@@ -71,10 +71,6 @@
 
     async void OpenSearchCover()
     {
-        //var dialog =  await DialogService.Show<MangaSearchCover>("Add new manga",new DialogParameters(){["Name"]=name}).Result;
-        //https://www.google.com/search?q=fullmetal+cover&client=img&source=lnms&tbm=isch
-        //https://www.bing.com/images/search?q=fullmetal+cover
-
         var query = new string(name + " cover").Replace(" ", "+");
         try
         {

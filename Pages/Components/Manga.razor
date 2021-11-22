@@ -199,6 +199,7 @@
     {
         // BrowserWindowOptions ops = new BrowserWindowOptions() {Width = 1000, Height = 700, AutoHideMenuBar = true, Title = "Lexi"};
         // var win = Electron.WindowManager.CreateWindowAsync(ops,$"http://localhost:{BridgeSettings.WebPort}/mangas/settings/{manga.id}");
+        backend.OCRManga(manga);
     }
 
     void AdvancedSetting()
