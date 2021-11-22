@@ -33,7 +33,7 @@ namespace OpenManga
         {  
             var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions(){Width = 1000, Height = 700,AutoHideMenuBar = true,Title = "Lexi"}); 
             //window.RemoveMenu();
-            window.SetAutoHideMenuBar(true);
+            //window.SetAutoHideMenuBar(false);
             window.SetTitle("Lexi");
             window.OnClosed += () => {  
                 Electron.App.Quit();  

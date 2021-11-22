@@ -1,13 +1,37 @@
-﻿<MudGrid>
+﻿@using HtmlAgilityPack
+
+<MudGrid>
     <MudItem xs="12">
-        <MudTextField T="string" Label="Search"></MudTextField>
+        <MudTextField T="string" @bind-Value="@Name" Label="Search"></MudTextField>
     </MudItem>
-    @* <MudItem xs=""></MudItem> *@
+    @foreach (var m in image_urls)
+    {
+        <MudItem xs="3">
+            <img src="@(m)"/>
+        </MudItem>        
+    }
 </MudGrid>
 
 @code{
 
-    [CascadingParameter] MudDialogInstance dialog { get; set; }
-    //[Parameter] string name;
+    [CascadingParameter] MudDialogInstance Dialog { get; set; }
+    [Parameter] public string Name { get; set; }
+    List<string> image_urls = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        GetImages();
+        base.OnInitialized();
+    }
+
+    void GetImages()
+    {
+        //TODO: treat possible names with special characters!
+        HtmlWeb web = new HtmlWeb();
+        HtmlDocument hdoc = web.Load($"https://www.google.com/search?q={Name.Replace(" ","+")}&client=img");;
+        image_urls = hdoc.DocumentNode.SelectNodes(@"//div[@class='rg_di']/a")
+                .Select(a => a.GetAttributeValue("href", "")).ToList();
+        image_urls.RemoveRange(5,image_urls.Count-5);
+    }
 
 }

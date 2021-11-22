@@ -2,11 +2,16 @@
 @using Newtonsoft.Json
 @using Database
 @using Backend
+@using OpenManga.Pages.Components.MangaFolder
 @using static Mangas.DataManga;
+@using ElectronNET.API
+@using ElectronNET.API.Entities
+@using System.Web
 
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IDatabase database
 @inject IBackend backend
+@inject IDialogService DialogService
 
 <MudGrid Style="padding: 15px">
     <MudItem xs="6">
@@ -37,14 +42,15 @@
         <MudTextField @bind-Value="baseurl" Label="Baseurl" Variant="Variant.Outlined"></MudTextField>
     </MudItem>
     
-    <MudItem xs="12">
+    <MudItem xs="12" Style="display: flex">
         <MudTextField @bind-Value="cover" Label="Cover url" Variant="Variant.Outlined"></MudTextField>
+        <MudIconButton Icon="@Icons.Filled.Search" OnClick="@OpenSearchCover"></MudIconButton>
     </MudItem>
     
     <MudItem xs="12">
         <div style="display: flex">
             <MudButton OnClick="Cancel" Color="Color.Error" Style="margin-right: 15px">Cancel</MudButton>
-            <MudButton OnClick="Okay" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary"  Size="Size.Large">Add</MudButton>
+            <MudButton OnClick="Okay" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary"  Size="MudBlazor.Size.Large">Add</MudButton>
         </div>
     </MudItem>
 </MudGrid>
@@ -61,6 +67,38 @@
     {
         database.SetLocalStorage(localStorage);
         base.OnInitialized();
+    }
+
+    async void OpenSearchCover()
+    {
+        //var dialog =  await DialogService.Show<MangaSearchCover>("Add new manga",new DialogParameters(){["Name"]=name}).Result;
+        //https://www.google.com/search?q=fullmetal+cover&client=img&source=lnms&tbm=isch
+        //https://www.bing.com/images/search?q=fullmetal+cover
+
+        var query = new string(name + " cover").Replace(" ", "+");
+        try
+        {
+            BrowserWindowOptions ops = new BrowserWindowOptions() {Width = 1000, Height = 700, AutoHideMenuBar = true, Title = "Lexi - Search cover image"};
+            var win = await Electron.WindowManager.CreateWindowAsync(ops,$"https://www.bing.com/images/search?q={query}");
+            win.OnClose += async () =>
+            {
+
+                var url = await win.WebContents.GetUrl(); //gets window current bing url
+                var splited = url.Split("mediaurl="); //parameter in bing url that leads to img source url
+                var final = HttpUtility.UrlDecode(splited[1].Substring(0, splited[1].IndexOf("&"))); //treats the url to get the right source
+                Console.WriteLine(url);
+                Console.WriteLine("----");
+                Console.WriteLine(final);
+                cover = final;
+
+            };
+            await InvokeAsync(() => StateHasChanged());
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     async void Okay()
