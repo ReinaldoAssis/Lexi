@@ -83,5 +83,10 @@ namespace Database
             return id;
         }
     }
+
+    // public class DataBase : IDatabase
+    // {
+    //     
+    // }
     
 }

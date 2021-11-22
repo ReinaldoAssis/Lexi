@@ -1,12 +1,71 @@
 @page "/home"
 @using Database
+@using ElectronNET.API
+@using LiteDB
 @inject ILocalStorageService _storage
 @inject IDatabase db
 
 <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(()=> db.DELETEWHOLEDB())">DELETE WHOLE DATABASE</MudButton>
+<MudGrid>
+    <MudItem xs="6">
+        <MudTextField @bind-Value="@test" Label="Value" T="string"></MudTextField>
+    </MudItem>
+    <MudItem xs="6">
+        <MudButton OnClick="@Save">Save</MudButton>
+    </MudItem>
+    <MudItem xs="6">
+            <MudText Typo="Typo.body1">@read</MudText>
+        </MudItem>
+        <MudItem xs="6">
+            <MudButton OnClick="@Read">Read</MudButton>
+        </MudItem>
+</MudGrid>
 
 @code{
 
+    string test = "";
+    string read = "";
+
+    public class TestData
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+
+        public TestData(string value)
+        {
+            Value = value;
+        }
+    }
+    
+    async void Save()
+    {
+        var path = await Electron.App.GetAppPathAsync();
+        using (var local = new LiteDatabase($@"{path}\data.db"))
+        {
+            var col = local.GetCollection<TestData>("tests");
+            if (col.Count() > 0)
+            {
+                var s = col.Query().First();
+                s.Value = test;
+                col.Update(s);
+
+            }
+            else
+            {
+                col.Insert(new TestData(test));
+            }
+        }
+    }
+
+    async void Read()
+    {
+        var path = await Electron.App.GetAppPathAsync();
+        using (var local = new LiteDatabase($@"{path}\data.db"))
+        {
+            read =local.GetCollection<TestData>("tests").Query().First().Value;
+        }
+    }
+    
     protected override void OnInitialized()
     {
         db.SetLocalStorage(_storage);

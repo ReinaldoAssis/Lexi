@@ -10,12 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using static OpenManga.Pages.Mangas;
 using HtmlAgilityPack;
-using Gehtsoft.PDFFlow;
-using Gehtsoft.PDFFlow.Builder;
-using Gehtsoft.PDFFlow.Models.Enumerations;
-using Gehtsoft.PDFFlow.Models.Shared;
-using Patagames.Ocr;
-using Patagames.Ocr.Enums;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -374,11 +368,11 @@ namespace Backend
 
         public void OCRManga(DataManga manga)
         {
-            string output = manga.download_folder + '\\' + manga.name + " OCR.pdf";
-            var ocr = OcrApi.Create();
-            ocr.Init(Languages.French);
-            var renderer = OcrPdfRenderer.Create(output);
-            ocr.ProcessPages(@$"{manga.download_folder+'\\'+manga.name+".pdf"}",renderer);
+            // string output = manga.download_folder + '\\' + manga.name + " OCR.pdf";
+            // var ocr = OcrApi.Create();
+            // ocr.Init(Languages.French);
+            // var renderer = OcrPdfRenderer.Create(output);
+            // ocr.ProcessPages(@$"{manga.download_folder+'\\'+manga.name+".pdf"}",renderer);
         }
     }
 }
