@@ -4,7 +4,7 @@
     "imageFile": ""
   },
   "name": "Lexi",
-  "author": "",
+  "author": "Reinaldo Miranda de Assis",
   "singleInstance": false,
   "environment": "Production",
   "build": {

@@ -4,10 +4,10 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OpenManga.Pages;
+using Lexi.Pages;
 using System.Collections.Generic;
 using System.Linq;
-using static OpenManga.Pages.Mangas;
+using static Lexi.Pages.Mangas;
 
 namespace Database
 {

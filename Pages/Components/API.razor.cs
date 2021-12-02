@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using static OpenManga.Pages.Mangas;
+using static Lexi.Pages.Mangas;
 using HtmlAgilityPack;
 using PdfSharp;
 using PdfSharp.Drawing;
@@ -345,7 +345,7 @@ namespace Backend
             }
             
             doc.Save(output);
-            //TempFilesCleanup(mangas);
+            TempFilesCleanup(mangas);
             Console.WriteLine("ITS COMPLETE!");
 
         }
