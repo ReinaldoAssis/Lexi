@@ -259,7 +259,7 @@
 
     protected override async void OnInitialized()
     {
-        db.SetLocalStorage(localStorage);
+        //db.SetLocalStorage(localStorage);
         manga = await db.GetManga(id ?? "00000000000");
         download_volume = manga.lastread;
         Console.WriteLine(manga.Idiom.Flag);
