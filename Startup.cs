@@ -10,15 +10,15 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenManga.Data;
 using MudBlazor.Services;
 using ElectronNET.API;
 using Blazored.LocalStorage;
 using Database;
 using ElectronNET.API.Entities;
-using Lexi.Data;
 
 
-namespace Lexi
+namespace OpenManga
 {
     public class Startup
     {
@@ -30,21 +30,14 @@ namespace Lexi
         public IConfiguration Configuration { get; }
 
         private async void CreateWindow()  
-        {
-            try
-            {
-                var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions(){Width = 1000, Height = 700,AutoHideMenuBar = true,Title = "Lexi"}); 
-                //window.RemoveMenu();
-                //window.SetAutoHideMenuBar(false);
-                window.SetTitle("Lexi");
-                window.OnClosed += () => {  
-                    Electron.App.Quit();  
-                };
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+        {  
+            var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions(){Width = 1000, Height = 700,AutoHideMenuBar = true,Title = "Lexi"}); 
+            //window.RemoveMenu();
+            //window.SetAutoHideMenuBar(false);
+            window.SetTitle("Lexi");
+            window.OnClosed += () => {  
+                Electron.App.Quit();  
+            };  
         }  
 
         // This method gets called by the runtime. Use this method to add services to the container.

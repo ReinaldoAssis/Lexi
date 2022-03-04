@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Lexi.Data
+namespace OpenManga.Data
 {
     public class WeatherForecastService
     {

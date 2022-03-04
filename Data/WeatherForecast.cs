@@ -1,6 +1,6 @@
 using System;
 
-namespace Lexi.Data
+namespace OpenManga.Data
 {
     public class WeatherForecast
     {

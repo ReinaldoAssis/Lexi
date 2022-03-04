@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ElectronNET.API; 
 
-namespace Lexi
+namespace OpenManga
 {
     public class Program
     {

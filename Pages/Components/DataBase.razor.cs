@@ -4,13 +4,17 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Lexi.Pages;
+using OpenManga.Pages;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+<<<<<<< HEAD
 using ElectronNET.API;
 using LiteDB;
 using static Lexi.Pages.Mangas;
+=======
+using static OpenManga.Pages.Mangas;
+>>>>>>> parent of 7ef89b2 (MAJOR FIX: Renamed project caused build failure)
 
 namespace Database
 {
