@@ -17,9 +17,9 @@ namespace Database
     public interface IDatabase
     {
         Task<List<Mangas.DataManga>> GetMangas();
-        void Write(string key, string col, object value);
+        void Write(string col, string key, object value);
 
-        DataBase.DBItem Read(string key, string col);
+        DataBase.DBItem Read(string col, string key);
 
         //void SetLocalStorage(ILocalStorageService storage);
 
@@ -115,7 +115,7 @@ namespace Database
             throw new NullReferenceException("AppPath not set to get Path To Db.");
         }
 
-        public void Write(string key, string col, object value)
+        public void Write(string col, string key, object value)
         {
             using (var local = new LiteDatabase(PathToDb()))
             {
@@ -124,7 +124,7 @@ namespace Database
             }
         }
 
-        public DBItem Read(string key, string col)
+        public DBItem Read(string col, string key)
         {
             using (var local = new LiteDatabase(PathToDb()))
             {
@@ -142,6 +142,12 @@ namespace Database
             }
 
             return new DBItem(null, null);
+        }
+
+        //appends value to a var
+        public List<DBItem> Append(string col, string key, string value)
+        {
+            
         }
         
         public async Task<List<Mangas.DataManga>> GetMangas()

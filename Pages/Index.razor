@@ -7,69 +7,30 @@
 
 <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(()=> db.DELETEWHOLEDB())">DELETE WHOLE DATABASE</MudButton>
 <MudGrid>
-    <MudItem xs="6">
-        <MudTextField @bind-Value="@test" Label="Value" T="string"></MudTextField>
+    <MudItem xs="3">
+        <MudTextField T="string" Label="Key" @bind-Value="@key"></MudTextField>
     </MudItem>
-    <MudItem xs="6">
-        <MudButton OnClick="@Save">Save</MudButton>
+    <MudItem xs="3">
+        <MudTextField T="string" Label="Value" @bind-Value="@value"></MudTextField>
     </MudItem>
-    <MudItem xs="6">
-            <MudText Typo="Typo.body1">@read</MudText>
-        </MudItem>
-        <MudItem xs="6">
-            <MudButton OnClick="@Read">Read</MudButton>
-        </MudItem>
+    <MudButton Variant="Variant.Filled" Color="Color.Dark">Save</MudButton>
 </MudGrid>
 
 @code{
 
-    string test = "";
-    string read = "";
+    string key = "";
+    string value = "";
 
-    public class TestData
+    List<object> objs = new List<object>();
+
+    void Save()
     {
-        public int Id { get; set; }
-        public string Value { get; set; }
-
-        public TestData(string value)
-        {
-            Value = value;
-        }
-    }
-    
-    async void Save()
-    {
-        var path = await Electron.App.GetAppPathAsync();
-        using (var local = new LiteDatabase($@"{path}\data.db"))
-        {
-            var col = local.GetCollection<TestData>("tests");
-            if (col.Count() > 0)
-            {
-                var s = col.Query().First();
-                s.Value = test;
-                col.Update(s);
-
-            }
-            else
-            {
-                col.Insert(new TestData(test));
-            }
-        }
+        db.Write("db",key,value);
     }
 
-    async void Read()
+    void Load()
     {
-        var path = await Electron.App.GetAppPathAsync();
-        using (var local = new LiteDatabase($@"{path}\data.db"))
-        {
-            read =local.GetCollection<TestData>("tests").Query().First().Value;
-        }
-    }
-    
-    protected override void OnInitialized()
-    {
-        //db.SetLocalStorage(_storage);
-        base.OnInitialized();
+        db.Read()
     }
 
 }
