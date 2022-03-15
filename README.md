@@ -1,16 +1,16 @@
-# Lexi
+# lexi
 
-![](./wwwroot/src/imgs/LexiBanner.jpg)
-An open source tool for learning languages in a fun way. Learn languages by reading manga, writing with A.I aid, listening to song lyrics and much more.
+A new Flutter project.
 
-![Alt](https://repobeats.axiom.co/api/embed/dd6e26598bc678f888e0ae7c7a3c51bdbe478df8.svg "Repobeats analytics image")
+## Getting Started
 
-## Screenshots
+This project is a starting point for a Flutter application.
 
-![App Screenshot](https://i.ibb.co/BL5fcGv/image.png)
+A few resources to get you started if this is your first Flutter project:
 
-![App Screenshot](https://i.ibb.co/mH8TMt5/image.png)
+- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-## NOTE
-
-Project is in early development, no build is available for download. Alpha release soon to be released.
+For help getting started with Flutter, view our
+[online documentation](https://flutter.dev/docs), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
