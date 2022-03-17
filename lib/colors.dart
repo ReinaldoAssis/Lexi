@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class AppColor {
@@ -63,6 +61,7 @@ class Palheta {
 
 class Homecolor {
   static Color PetroBlue = const Color(0xFF233974);
+  static Color PetroBlue100 = Color.fromARGB(255, 57, 91, 184);
   static List<BoxShadow> Sombra = [
     BoxShadow(
         color: Colors.black.withOpacity(0.1),

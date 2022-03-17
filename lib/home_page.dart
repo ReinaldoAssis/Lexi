@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:lexi/components/FloatingNavBar.dart';
 import 'package:lexi/homepage/ContinueReading.dart';
 import 'package:lexi/homepage/LibraryText.dart';
 import 'package:lexi/homepage/MangaCover.dart';
@@ -17,12 +18,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late ScrollController scroller;
+
+  @override
+  void initState() {
+    super.initState();
+    scroller = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    scroller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width / 100;
     double h = MediaQuery.of(context).size.height / 100;
 
     return Scaffold(
+      extendBody: true,
+      bottomNavigationBar: FloatingNavBar(scroller: scroller),
       body: Column(
         children: [
           Row(
@@ -77,7 +94,8 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: Container(
               padding: const EdgeInsets.only(top: 10),
-              child: ListView(children: [
+              height: 100 * h,
+              child: ListView(controller: scroller, children: [
                 UnderlineText(
                   text: "Library",
                 ),
@@ -130,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ]),
             ),
-          )
+          ),
         ],
       ),
     );
