@@ -48,6 +48,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
     return Stack(
       alignment: Alignment.center,
       fit: StackFit.passthrough,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       children: [
         AnimatedPositioned(
           width: MediaQuery.of(context).size.width,
@@ -61,42 +62,47 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
               decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: const BorderRadius.all(Radius.circular(50)),
-                  boxShadow: Homecolor.Sombra),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withAlpha(80), blurRadius: 6)
+                  ]),
               clipBehavior: Clip.none,
-              child: ListView.builder(
-                itemCount: icons.length,
-                itemBuilder: (ctx, i) {
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 7),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            SelectedIndex = i;
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: Duration(microseconds: 250),
-                          width: 35,
-                          decoration: BoxDecoration(
-                            border: i == SelectedIndex
-                                ? Border(
-                                    bottom: BorderSide(
-                                        width: 3,
-                                        color: Homecolor.PetroBlue100))
-                                : null,
+              child: Center(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: icons.length,
+                  itemBuilder: (ctx, i) {
+                    return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 7),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              SelectedIndex = i;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: Duration(microseconds: 250),
+                            width: 35,
+                            decoration: BoxDecoration(
+                              border: i == SelectedIndex
+                                  ? Border(
+                                      bottom: BorderSide(
+                                          width: 3,
+                                          color: Homecolor.PetroBlue100))
+                                  : null,
+                            ),
+                            child: Icon(
+                              icons[i],
+                              size: 30,
+                              color: i == SelectedIndex
+                                  ? Homecolor.PetroBlue100
+                                  : Colors.white,
+                            ),
                           ),
-                          child: Icon(
-                            icons[i],
-                            size: 30,
-                            color: i == SelectedIndex
-                                ? Homecolor.PetroBlue100
-                                : Colors.white,
-                          ),
-                        ),
-                      ));
-                },
-                scrollDirection: Axis.horizontal,
+                        ));
+                  },
+                  scrollDirection: Axis.horizontal,
+                ),
               ),
             ),
           ),

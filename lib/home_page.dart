@@ -91,66 +91,81 @@ class _HomePageState extends State<HomePage> {
 
           //************** */
 
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(top: 10),
-              height: 100 * h,
-              child: ListView(controller: scroller, children: [
-                UnderlineText(
-                  text: "Library",
-                ),
-
-                SizedBox(
-                  height: 15,
-                ),
-
-                //*************** */
-
-                Container(
-                  height: 35.h,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      ...Mangas.map((e) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 10),
-                          child: MangaCover(
-                            e,
-                          ))),
-                    ],
-                  ),
-                ),
-
-                UnderlineText(
-                  text: "Trending",
-                  width: 115,
-                ),
-
-                SizedBox(
-                  height: 15,
-                ),
-
-                Container(
-                  height: 35.h,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      ...Mangas.map((e) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 10),
-                          child: MangaCover(
-                            e,
-                          ))),
-                    ],
-                  ),
-                ),
-              ]),
-            ),
-          ),
+          HomeFeed(scroller: scroller, h: h),
         ],
       ),
+    );
+  }
+}
+
+class HomeFeed extends StatelessWidget {
+  const HomeFeed({
+    Key? key,
+    required this.scroller,
+    required this.h,
+  }) : super(key: key);
+
+  final ScrollController scroller;
+  final double h;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44 * h,
+      padding: const EdgeInsets.only(top: 10),
+      child: ListView(controller: scroller, children: [
+        UnderlineText(
+          text: "Library",
+        ),
+
+        SizedBox(
+          height: 15,
+        ),
+
+        //*************** */
+
+        Container(
+          height: 35 * h,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              ...Mangas.map((e) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  child: MangaCover(
+                    e,
+                  ))),
+            ],
+          ),
+        ),
+
+        UnderlineText(
+          text: "Trending",
+          width: 115,
+        ),
+
+        SizedBox(
+          height: 15,
+        ),
+
+        Container(
+          height: 35 * h,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              ...Mangas.map((e) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  child: MangaCover(
+                    e,
+                  ))),
+            ],
+          ),
+        ),
+        Text("teste")
+      ]),
     );
   }
 }
