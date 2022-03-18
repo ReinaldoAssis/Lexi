@@ -34,11 +34,11 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
 
     if (dir == ScrollDirection.forward) {
       setState(() {
-        visible = false;
+        visible = true;
       });
     } else if (dir == ScrollDirection.reverse) {
       setState(() {
-        visible = true;
+        visible = false;
       });
     }
   }
@@ -53,7 +53,8 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
         AnimatedPositioned(
           width: MediaQuery.of(context).size.width,
           bottom: visible ? 0 : -90,
-          duration: Duration(milliseconds: 200),
+          curve: Curves.easeIn,
+          duration: Duration(milliseconds: 250),
           child: Padding(
             padding: const EdgeInsets.only(right: 60, left: 60, bottom: 20),
             child: Container(

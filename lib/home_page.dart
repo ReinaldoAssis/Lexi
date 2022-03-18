@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:lexi/components/FloatingNavBar.dart';
 import 'package:lexi/homepage/ContinueReading.dart';
 import 'package:lexi/homepage/LibraryText.dart';
@@ -20,16 +21,34 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late ScrollController scroller;
 
+  bool extended_feed = false;
+
   @override
   void initState() {
     super.initState();
     scroller = ScrollController();
+    scroller.addListener(scroll);
   }
 
   @override
   void dispose() {
+    scroller.removeListener(scroll);
     scroller.dispose();
     super.dispose();
+  }
+
+  void scroll() {
+    ScrollDirection dir = scroller.position.userScrollDirection;
+
+    if (dir == ScrollDirection.forward) {
+      setState(() {
+        extended_feed = false;
+      });
+    } else if (dir == ScrollDirection.reverse) {
+      setState(() {
+        extended_feed = true;
+      });
+    }
   }
 
   @override
@@ -84,36 +103,75 @@ class _HomePageState extends State<HomePage> {
 
           SearchField(),
           SizedBox(
-            height: 30,
+            height: extended_feed ? 10 : 30,
           ),
 
-          ContinueReading(),
+          ContinueReading(
+            scroller: scroller,
+          ),
 
           //************** */
 
-          HomeFeed(scroller: scroller, h: h),
+          HomeFeed(
+            h: h,
+            scroller: scroller,
+          ),
         ],
       ),
     );
   }
 }
 
-class HomeFeed extends StatelessWidget {
+class HomeFeed extends StatefulWidget {
   const HomeFeed({
     Key? key,
     required this.scroller,
     required this.h,
   }) : super(key: key);
 
-  final ScrollController scroller;
   final double h;
+  final ScrollController scroller;
+
+  @override
+  State<HomeFeed> createState() => _HomeFeedState();
+}
+
+class _HomeFeedState extends State<HomeFeed> {
+  bool extended_feed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scroller.addListener(scroll);
+  }
+
+  @override
+  void dispose() {
+    widget.scroller.dispose();
+    super.dispose();
+  }
+
+  void scroll() {
+    ScrollDirection dir = widget.scroller.position.userScrollDirection;
+
+    if (dir == ScrollDirection.forward) {
+      setState(() {
+        extended_feed = false;
+      });
+    } else if (dir == ScrollDirection.reverse) {
+      setState(() {
+        extended_feed = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 44 * h,
-      padding: const EdgeInsets.only(top: 10),
-      child: ListView(controller: scroller, children: [
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 320),
+      height: extended_feed ? 70 * widget.h : 48 * widget.h,
+      padding: EdgeInsets.only(top: (extended_feed ? 0 : 10)),
+      child: ListView(controller: widget.scroller, children: [
         UnderlineText(
           text: "Library",
         ),
@@ -125,7 +183,7 @@ class HomeFeed extends StatelessWidget {
         //*************** */
 
         Container(
-          height: 35 * h,
+          height: 35 * widget.h,
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -150,7 +208,7 @@ class HomeFeed extends StatelessWidget {
         ),
 
         Container(
-          height: 35 * h,
+          height: 35 * widget.h,
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -164,7 +222,6 @@ class HomeFeed extends StatelessWidget {
             ],
           ),
         ),
-        Text("teste")
       ]),
     );
   }
