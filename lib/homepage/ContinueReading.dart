@@ -65,15 +65,16 @@ class _ContinueReadingState extends State<ContinueReading> {
       clipBehavior: Clip.none,
       children: [
         AnimatedOpacity(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 200),
           opacity: visible ? 1 : 0,
+          curve: Curves.easeInOut,
           child: AnimatedScale(
-            curve: Curves.easeOut,
+            curve: Curves.easeInOutCirc,
             duration: Duration(milliseconds: 350),
             scale: visible ? 1 : 0,
             child: AnimatedContainer(
               curve: Curves.easeOut,
-              duration: Duration(milliseconds: 450),
+              duration: Duration(milliseconds: 350),
               padding: const EdgeInsets.only(top: 7, left: 160, right: 10),
               alignment: Alignment.center,
               width: w * 90,
@@ -124,7 +125,7 @@ class _ContinueReadingState extends State<ContinueReading> {
           top: -h * 2,
           left: w * 5,
           child: AnimatedOpacity(
-            duration: Duration(milliseconds: 300),
+            duration: Duration(milliseconds: 100),
             opacity: visible ? 1 : 0,
             child: AnimatedScale(
               curve: Curves.easeOut,

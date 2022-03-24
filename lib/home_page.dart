@@ -168,8 +168,8 @@ class _HomeFeedState extends State<HomeFeed> {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 320),
-      height: extended_feed ? 70 * widget.h : 48 * widget.h,
+      duration: Duration(milliseconds: 100),
+      height: extended_feed ? 73 * widget.h : 48 * widget.h,
       padding: EdgeInsets.only(top: (extended_feed ? 0 : 10)),
       child: ListView(controller: widget.scroller, children: [
         UnderlineText(
@@ -183,7 +183,7 @@ class _HomeFeedState extends State<HomeFeed> {
         //*************** */
 
         Container(
-          height: 35 * widget.h,
+          height: 32 * widget.h,
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -207,21 +207,33 @@ class _HomeFeedState extends State<HomeFeed> {
           height: 15,
         ),
 
-        Container(
-          height: 35 * widget.h,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              ...Mangas.map((e) => Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                  child: MangaCover(
-                    e,
-                  ))),
-            ],
-          ),
-        ),
+        ...List.generate(
+            (Mangas.length / 2).round(),
+            (i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      MangaCover(Mangas[i]),
+                      MangaCover(Mangas[i + 1])
+                    ],
+                  ),
+                ))
+
+        // Container(
+        //   height: 60 * widget.h,
+        //   padding: const EdgeInsets.symmetric(horizontal: 20),
+        //   child: ListView(
+        //     children: [
+        //       ...Mangas.map((e) => Padding(
+        //           padding:
+        //               const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        //           child: MangaCover(
+        //             e,
+        //           ))),
+        //     ],
+        //   ),
+        // ),
       ]),
     );
   }

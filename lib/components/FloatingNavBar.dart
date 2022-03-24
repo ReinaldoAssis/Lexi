@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:lexi/MangaPage/MangaPage.dart';
 import 'package:lexi/colors.dart';
+import 'package:lexi/home_page.dart';
 
 class FloatingNavBar extends StatefulWidget {
   FloatingNavBar({Key? key, required this.scroller}) : super(key: key);
@@ -14,6 +16,7 @@ class FloatingNavBar extends StatefulWidget {
 class _FloatingNavBarState extends State<FloatingNavBar> {
   int SelectedIndex = 0;
   List<IconData> icons = [Icons.home, Icons.download, Icons.settings];
+  List<Widget> pages = [HomePage(), MangaPage(), Container()];
 
   bool visible = true;
 
